@@ -19,9 +19,6 @@ public:
 public:
     static std::optional<Context> Create()
     {
-        bool success = SDL_Init(SDL_INIT_VIDEO);
-        CheckSDL(success);
-
         SDL_Window* window {};
         SDL_Renderer* renderer {};
 

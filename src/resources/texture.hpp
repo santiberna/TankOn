@@ -21,7 +21,7 @@ class Texture
 {
 public:
     static std::optional<Texture> FromImage(SDL_Renderer* renderer, const Image& image);
-    SDL_FRect GetSpriteRect(const glm::vec2& offset) const;
+    glm::vec2 GetSpriteSize() const;
 
     hpp::unique_ptr<SDL_Texture, SDL_DestroyTexture> handle {};
 };

@@ -1,17 +1,27 @@
 add_library(ThirdParty INTERFACE)
 set(DEPENDENCY_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/lib/${CMAKE_SYSTEM_NAME}-${CMAKE_BUILD_TYPE}")
 
+# ALL DLLS
+
+file(GLOB_RECURSE dlls CONFIGURE_DEPENDS "${DEPENDENCY_LIBRARY_PATH}/*.dll")
+
+add_custom_target(DLL_LIBRARIES ALL
+    COMMENT "Copying DLLs to Output"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+        "${DEPENDENCY_LIBRARY_PATH}/SDL3.dll" 
+        "${CMAKE_BINARY_DIR}"
+)
+
 # SDL
 
 add_library(SDL3 INTERFACE)
 target_include_directories(SDL3 INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/SDL")
-target_link_libraries(SDL3 INTERFACE "${DEPENDENCY_LIBRARY_PATH}/SDL3.lib")
 
-add_custom_target(COPY_SDL_DLL ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DEPENDENCY_LIBRARY_PATH}/SDL3.dll" "${CMAKE_BINARY_DIR}"
-    COMMENT "Copying SDL DLL to Output")
+target_link_libraries(SDL3 
+    INTERFACE "${DEPENDENCY_LIBRARY_PATH}/SDL3.lib"
+)
 
-add_dependencies(SDL3 COPY_SDL_DLL)
+add_dependencies(SDL3 DLL_LIBRARIES)
 
 if (BUILD_DEPENDENCIES)
     
@@ -27,18 +37,18 @@ if (BUILD_DEPENDENCIES)
 
     target_output_directory(SDL3-shared "${DEPENDENCY_LIBRARY_PATH}")
 
-    add_custom_target(COPY_SDL_INCLUDES ALL
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${sdl_lib_SOURCE_DIR}/include" "${CMAKE_CURRENT_SOURCE_DIR}/SDL"
-        COMMENT "Copying SDL include folder")
+    add_custom_target(COPY_INCLUDES ALL
+        COMMENT "Copying include folders"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different 
+            "${sdl_lib_SOURCE_DIR}/include" 
+            "${CMAKE_CURRENT_SOURCE_DIR}/SDL"
+    )
 
-    add_dependencies(COPY_SDL_INCLUDES SDL3-shared)
-    add_dependencies(COPY_SDL_DLL SDL3-shared)
+    add_dependencies(COPY_INCLUDES SDL3-shared)
+    add_dependencies(DLL_LIBRARIES SDL3-shared)
+    add_dependencies(SDL3 COPY_INCLUDES)
 
 endif()
-
-# STB
-
-add_subdirectory(stb)
 
 # GLM
 
@@ -69,7 +79,6 @@ FetchContent_MakeAvailable(MagicEnum)
 
 target_link_libraries(ThirdParty 
     INTERFACE SDL3
-    INTERFACE STB
     INTERFACE glm::glm
     INTERFACE magic_enum::magic_enum
     )

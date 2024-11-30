@@ -23,7 +23,7 @@
             "inherits": "default",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "BUILD_DEPENDENCIES": false
+                "BUILD_DEPENDENCIES": true
             }
         }
     ]

@@ -1,5 +1,5 @@
 #include <resources/texture.hpp>
-#include <stb/stb_image.h>
+#include <resources/stb_image.h>
 
 std::optional<Image> Image::FromFile(const std::string& path)
 {
@@ -34,12 +34,12 @@ std::optional<Texture> Texture::FromImage(SDL_Renderer* renderer, const Image& i
     return out;
 }
 
-SDL_FRect Texture::GetSpriteRect(const glm::vec2& offset) const
+glm::vec2 Texture::GetSpriteSize() const
 {
     float width = static_cast<float>(handle->w);
     float height = static_cast<float>(handle->h);
 
     return {
-        offset.x - width * 0.5f, offset.y - height * 0.5f, width, height
+        width, height
     };
 }
