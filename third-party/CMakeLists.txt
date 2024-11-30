@@ -36,7 +36,40 @@ if (BUILD_DEPENDENCIES)
 
 endif()
 
+# STB
+
+add_subdirectory(stb)
+
+# GLM
+
+FetchContent_Declare(
+    GLM_lib
+    GIT_REPOSITORY https://github.com/g-truc/glm.git
+    GIT_TAG 1.0.1
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS TRUE
+)
+
+FetchContent_MakeAvailable(GLM_lib)
+
+# MagicEnum
+
+FetchContent_Declare(
+    MagicEnum
+    GIT_REPOSITORY https://github.com/Neargye/magic_enum.git
+    GIT_TAG v0.9.6
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS TRUE
+)
+
+FetchContent_MakeAvailable(MagicEnum)
+
+
 # LINK DEPENDENCIES
 
 target_link_libraries(ThirdParty 
-    INTERFACE SDL3)
+    INTERFACE SDL3
+    INTERFACE STB
+    INTERFACE glm::glm
+    INTERFACE magic_enum::magic_enum
+    )
