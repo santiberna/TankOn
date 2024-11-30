@@ -16,3 +16,4 @@ assets/**/*.glb filter=lfs diff=lfs merge=lfs -text
 assets/**/*.bin filter=lfs diff=lfs merge=lfs -text
 assets/**/*.json filter=lfs diff=lfs merge=lfs -text
 assets/**/*.psd filter=lfs diff=lfs merge=lfs -text
+assets/**/*.xml filter=lfs diff=lfs merge=lfs -text
