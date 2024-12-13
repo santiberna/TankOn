@@ -74,11 +74,31 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(MagicEnum)
 
+# Boost
+
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+find_package(Boost 1.50 REQUIRED)
+
+target_compile_definitions(ThirdParty INTERFACE _WIN32_WINDOWS)
+message(STATUS "Boost version: ${Boost_VERSION}")
+message(STATUS "Boost include dir: ${Boost_INCLUDE_DIRS}")
+message(STATUS "Boost library dir: ${Boost_LIBRARY_DIRS}")
 
 # LINK DEPENDENCIES
+
+target_include_directories(ThirdParty
+    INTERFACE ${Boost_INCLUDE_DIRS}
+)
+
+target_link_directories(ThirdParty
+    INTERFACE ${Boost_LIBRARY_DIRS}
+)
 
 target_link_libraries(ThirdParty 
     INTERFACE SDL3
     INTERFACE glm::glm
     INTERFACE magic_enum::magic_enum
+    ${Boost_LIBRARIES}
     )

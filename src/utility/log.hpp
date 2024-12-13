@@ -1,3 +1,4 @@
+#pragma once
 #include <format>
 #include <iostream>
 
@@ -8,7 +9,7 @@ void Log(std::string_view str, const Args&... args)
 }
 
 template <typename... Args>
-void Log(std::wstring_view str, const Args&... args)
+void LogW(std::wstring_view str, const Args&... args)
 {
     std::wcout << std::vformat(str, std::make_wformat_args(args...)) << "\n";
 }
