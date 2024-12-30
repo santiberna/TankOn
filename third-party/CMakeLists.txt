@@ -79,12 +79,31 @@ FetchContent_MakeAvailable(MagicEnum)
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost 1.50 REQUIRED)
+
+set(BOOST_ROOT  "C:/Program Files/Boost/boost_1_86_0")
+
+find_package(Boost 1.50 REQUIRED COMPONENTS)
 
 target_compile_definitions(ThirdParty INTERFACE _WIN32_WINDOWS)
 message(STATUS "Boost version: ${Boost_VERSION}")
 message(STATUS "Boost include dir: ${Boost_INCLUDE_DIRS}")
 message(STATUS "Boost library dir: ${Boost_LIBRARY_DIRS}")
+
+# Cereal
+
+FetchContent_Declare(
+    Cereal
+    GIT_REPOSITORY https://github.com/USCiLab/cereal.git
+    GIT_TAG v1.3.2
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS TRUE
+)
+
+set(BUILD_DOC OFF)
+set(BUILD_SANDBOX OFF)
+set(SKIP_PERFORMANCE_COMPARISON ON)
+
+FetchContent_MakeAvailable(Cereal)
 
 # LINK DEPENDENCIES
 
@@ -100,5 +119,6 @@ target_link_libraries(ThirdParty
     INTERFACE SDL3
     INTERFACE glm::glm
     INTERFACE magic_enum::magic_enum
+    #INTERFACE cereal::cereal
     ${Boost_LIBRARIES}
     )
