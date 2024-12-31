@@ -1,20 +1,33 @@
 # MAIN PROJECT
 
-add_executable(${PROJECT_NAME})
-
-target_link_libraries(${PROJECT_NAME} PRIVATE ThirdParty)
+add_library(${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME} PUBLIC ThirdParty)
 
 target_compile_options(${PROJECT_NAME} 
-    PRIVATE -Wall 
-    PRIVATE -Wextra)
+    PUBLIC -Wall 
+    PUBLIC -Wextra)
 
 target_include_directories(${PROJECT_NAME} 
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_compile_features(${PROJECT_NAME} 
-    PRIVATE cxx_std_20)
+    PUBLIC cxx_std_20)
 
-file(GLOB_RECURSE source CONFIGURE_DEPENDS "*.cpp" "*.hpp")
+file(GLOB_RECURSE source CONFIGURE_DEPENDS
+    "context/*.cpp" "context*.hpp"
+    "math/*.cpp" "math*.hpp"
+    "network/*.cpp" "network*.hpp"
+    "resources/*.cpp" "resources*.hpp"
+    "utility/*.cpp" "utility*.hpp"
+)
+
 target_sources(${PROJECT_NAME} PRIVATE ${source})
 
-target_output_directory(${PROJECT_NAME} ${CMAKE_BINARY_DIR})
+add_executable(${PROJECT_NAME}Client "main_client.cpp")
+target_link_libraries(${PROJECT_NAME}Client PRIVATE ${PROJECT_NAME})
+target_output_directory(${PROJECT_NAME}Client ${CMAKE_BINARY_DIR})
+
+
+add_executable(${PROJECT_NAME}Server "main_server.cpp")
+target_link_libraries(${PROJECT_NAME}Server PRIVATE ${PROJECT_NAME})
+target_output_directory(${PROJECT_NAME}Server ${CMAKE_BINARY_DIR})
