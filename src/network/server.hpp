@@ -10,14 +10,16 @@ public:
         : acceptor(context, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port))
     {
         acceptor.async_accept(context, BindMember(this, &TCPServer::HandleAccept));
-        context_thread = std::jthread([this]()
+        context_thread = std::thread([this]()
             { context.run(); });
     }
 
     ~TCPServer()
     {
         context.stop();
-        context_thread.join();
+
+        if (context_thread.joinable())
+            context_thread.join();
     }
 
     void WaitAndRespondMessages(std::function<void(TCPConnection& connection, const Message&)> message_handler)
@@ -36,7 +38,7 @@ private:
 
 private:
     asio::io_context context {};
-    std::jthread context_thread {};
+    std::thread context_thread {};
 
     asio::ip::tcp::acceptor acceptor;
     std::vector<std::shared_ptr<TCPConnection>> connections {};

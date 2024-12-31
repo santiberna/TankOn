@@ -30,6 +30,11 @@ public:
             asio::post(context, [this]()
                 { connection->GetSocket().close(); });
         }
+
+        context.stop();
+
+        if (context_thread.joinable())
+            context_thread.join();
     }
 
     void ProcessMessages(std::function<void(TCPConnection& connection, const Message&)> message_handler)
@@ -49,7 +54,7 @@ public:
 private:
     TSDeque<OwnedMessage> messages_in {};
     asio::io_context context {};
-    std::jthread context_thread {};
+    std::thread context_thread {};
 
     std::shared_ptr<TCPConnection> connection {};
 };

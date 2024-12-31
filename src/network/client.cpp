@@ -11,6 +11,6 @@ TCPClient::TCPClient(const std::string& hostname, uint16_t port)
     Log("Connected to {}", ip.address().to_string());
     connection->StartListening();
 
-    context_thread = std::jthread([this]()
+    context_thread = std::thread([this]()
         { context.run(); });
 }
