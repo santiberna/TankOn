@@ -2,15 +2,15 @@
 
 enum MessageType
 {
-    PING = 0,
-    ECHO = 1
+    ePING = 0,
+    eECHO = 1
 };
 
 void ClientMessageHandler(TCPConnection& sender, const Message& msg)
 {
     switch (msg.header.message_type)
     {
-    case MessageType::PING:
+    case MessageType::ePING:
     {
         auto now = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
         auto then = std::stoll(msg.body.data);
@@ -18,7 +18,7 @@ void ClientMessageHandler(TCPConnection& sender, const Message& msg)
         Log("Ping took: {} microseconds", ping_time);
         break;
     }
-    case MessageType::ECHO:
+    case MessageType::eECHO:
     {
         Log("Received: {}", msg.body.data);
     }
@@ -49,7 +49,7 @@ int main(int argc, char* args[])
             std::cout << "Send Message: ";
             std::getline(std::cin, echo);
 
-            client.Send(Message(MessageType::ECHO, echo));
+            client.Send(Message(MessageType::eECHO, echo));
             client.WaitForMessage();
             client.ProcessMessages(ClientMessageHandler);
         }

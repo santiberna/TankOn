@@ -2,22 +2,22 @@
 
 enum MessageType
 {
-    PING = 0,
-    ECHO = 1
+    ePING = 0,
+    eECHO = 1
 };
 
 void ServerMessageHandler(TCPConnection& sender, const Message& msg)
 {
     switch (msg.header.message_type)
     {
-    case MessageType::PING:
-        sender.Post({ MessageType::PING, msg.body.data });
+    case MessageType::ePING:
+        sender.Post({ MessageType::ePING, msg.body.data });
         break;
-    case MessageType::ECHO:
+    case MessageType::eECHO:
     {
         std::string message = msg.body.data;
         std::reverse(message.begin(), message.end());
-        sender.Post(Message(MessageType::ECHO, message));
+        sender.Post(Message(MessageType::eECHO, message));
     }
     default:
         break;
