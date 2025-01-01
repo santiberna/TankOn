@@ -10,7 +10,6 @@ include(cmake/utility.cmake)
 # OPTIONS
 
 option(ENABLE_TESTS "Compile Unit Tests" OFF)
-option(BUILD_DEPENDENCIES "Build and Cache Dependencies" OFF)
 
 # MAIN EXECUTABLE
 

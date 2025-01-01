@@ -14,10 +14,10 @@ target_compile_features(${PROJECT_NAME}
     PUBLIC cxx_std_20)
 
 file(GLOB_RECURSE source CONFIGURE_DEPENDS
-    "context/*.cpp" "context*.hpp"
-    "math/*.cpp" "math*.hpp"
+    #"context/*.cpp" "context*.hpp"
+    #"math/*.cpp" "math*.hpp"
     "network/*.cpp" "network*.hpp"
-    "resources/*.cpp" "resources*.hpp"
+    #"resources/*.cpp" "resources*.hpp"
     "utility/*.cpp" "utility*.hpp"
 )
 
