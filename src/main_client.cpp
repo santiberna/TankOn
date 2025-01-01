@@ -3,6 +3,7 @@
 enum MessageType
 {
     PING = 0,
+    ECHO = 1
 };
 
 void ClientMessageHandler(TCPConnection& sender, const Message& msg)
@@ -14,8 +15,12 @@ void ClientMessageHandler(TCPConnection& sender, const Message& msg)
         auto now = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
         auto then = std::stoll(msg.body.data);
         auto ping_time = now - then;
-        Log("Ping took: {}ms", ping_time);
+        Log("Ping took: {} microseconds", ping_time);
         break;
+    }
+    case MessageType::ECHO:
+    {
+        Log("Received: {}", msg.body.data);
     }
     }
 }
@@ -27,7 +32,6 @@ int main(int argc, char* args[])
     std::string ip_address;
     std::cout << "Provide IP Address to connect: ";
     std::cin >> ip_address;
-    std::cout << std::endl;
 
     try
     {
@@ -38,14 +42,16 @@ int main(int argc, char* args[])
 
         while (true)
         {
-            auto now = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
-            auto msg = Message(PING, std::to_string(now.count()));
+            // auto now = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
+            // auto msg = Message(PING, std::to_string(now.count()));
 
-            client.Send(msg);
+            std::string echo {};
+            std::cout << "Send Message: ";
+            std::getline(std::cin, echo);
+
+            client.Send(Message(MessageType::ECHO, echo));
             client.WaitForMessage();
             client.ProcessMessages(ClientMessageHandler);
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         }
     }
     catch (const std::exception& e)

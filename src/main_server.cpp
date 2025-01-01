@@ -3,6 +3,7 @@
 enum MessageType
 {
     PING = 0,
+    ECHO = 1
 };
 
 void ServerMessageHandler(TCPConnection& sender, const Message& msg)
@@ -12,6 +13,12 @@ void ServerMessageHandler(TCPConnection& sender, const Message& msg)
     case MessageType::PING:
         sender.Post({ MessageType::PING, msg.body.data });
         break;
+    case MessageType::ECHO:
+    {
+        std::string message = msg.body.data;
+        std::reverse(message.begin(), message.end());
+        sender.Post(Message(MessageType::ECHO, message));
+    }
     default:
         break;
     }
