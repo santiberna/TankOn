@@ -1,5 +1,7 @@
 add_library(ThirdParty INTERFACE)
 
+# SDL
+
 FetchContent_Declare(
     SDL_lib
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
@@ -42,7 +44,7 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 
 if (WIN32)
-    set(BOOST_ROOT  "C:/Program Files/Boost/boost_1_86_0")
+    set(BOOST_ROOT "C:/Program Files/Boost/boost_1_86_0")
     target_compile_definitions(ThirdParty INTERFACE _WIN32_WINDOWS)
 endif ()
 
@@ -68,6 +70,28 @@ set(SKIP_PERFORMANCE_COMPARISON ON)
 
 FetchContent_MakeAvailable(Cereal)
 
+# ImGui
+
+file(GLOB_RECURSE imgui_source CONFIGURE_DEPENDS 
+    "imgui/imgui.h" "imgui/*.h"
+    "imgui/backends/*.cpp" "imgui/backends/*.h"
+    "imgui/misc/*.cpp" "imgui/misc/.h"
+    )
+
+add_library(ImGui)
+target_include_directories(ImGui PUBLIC "imgui")
+target_link_libraries(ImGui PRIVATE SDL3-shared)
+
+target_sources(ImGui PRIVATE 
+    "imgui/imgui.cpp" 
+    "imgui/imgui_draw.cpp"
+    "imgui/imgui_tables.cpp"
+    "imgui/imgui_widgets.cpp"
+    "imgui/misc/cpp/imgui_stdlib.cpp"
+    "imgui/backends/imgui_impl_sdl3.cpp"
+    "imgui/backends/imgui_impl_sdlrenderer3.cpp"
+    )
+
 # LINK DEPENDENCIES
 
 target_include_directories(ThirdParty
@@ -79,9 +103,9 @@ target_link_directories(ThirdParty
 )
 
 target_link_libraries(ThirdParty 
-    #INTERFACE SDL3-shared
+    INTERFACE SDL3-shared
     INTERFACE glm::glm
-    INTERFACE magic_enum::magic_enum
-    #INTERFACE cereal::cereal
+    INTERFACE cereal::cereal
+    INTERFACE ImGui
     ${Boost_LIBRARIES}
     )

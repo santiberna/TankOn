@@ -1,53 +1,46 @@
-// #include <Game.hpp>
-// #include <SDL3/SDL_main.h>
-// #include <chrono>
+#include <game/game.hpp>
+#include <SDL3/SDL_main.h>
+#include <utility/imgui_common.hpp>
 
-// #include <thread>
-// #include <network/server.hpp>
-// #include <network/client.hpp>
+int main(int argc, char* args[])
+{
+    SDLAbortIfFailed(SDL_Init(SDL_INIT_VIDEO));
 
-// void client_entry()
-// {
-//     using namespace std::chrono_literals;
+    {
+        Game game {};
+        imgui_shortcuts::InitSDL3(game.context.GetWindow(), game.context.GetRenderer());
 
-//     try
-//     {
-//         TCPClient client { "localhost", 6000 };
+        while (!game.should_quit)
+        {
+            imgui_shortcuts::StartFrame();
 
-//         if (!client.IsConnected())
-//             return;
+            game.ProcessAllEvents();
 
-//         while (true)
-//         {
-//             auto now = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
-//             auto msg = Message(PING, std::to_string(now.count()));
+            switch (game.state)
+            {
+            case GameState::eMENU:
+            {
+                game.ClearScreen(glm::vec3 {});
+                game.DrawMenuUI();
+                break;
+            }
+            case GameState::eLOBBY:
+            {
+                break;
+            }
+            case GameState::eGAME:
+            {
+                break;
+            }
+            }
 
-//             client.Send(msg);
-//             client.WaitForMessage();
-//             client.ProcessMessages(ClientMessageHandler);
+            imgui_shortcuts::EndFrame(game.context.GetRenderer());
+            SDL_RenderPresent(game.context.GetRenderer());
+        }
 
-//             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-//         }
-//     }
-//     catch (const std::exception& e)
-//     {
-//         Log("Network Error: {}", e.what());
-//     }
-// }
+        imgui_shortcuts::ShutdownSDL3();
+    }
 
-// int main(int argc, char* args[])
-// {
-//     std::string start_config {};
-//     std::cin >> start_config;
-
-//     if (start_config == "server")
-//     {
-//         server_entry();
-//     }
-//     else if (start_config == "client")
-//     {
-//         client_entry();
-//     }
-
-//     return 0;
-// }
+    SDL_Quit();
+    return 0;
+}

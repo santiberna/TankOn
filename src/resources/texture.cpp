@@ -18,7 +18,7 @@ std::optional<Image> Image::FromFile(const std::string& path)
     stbi_image_free(result);
 
     SDL_Surface* surface = SDL_CreateSurfaceFrom(width, height, SDL_PIXELFORMAT_RGBA32, out.data.data(), 4 * width);
-    CheckSDL(surface);
+    SDLCheck(surface);
 
     out.surface = decltype(out.surface) { surface };
     return out;
@@ -27,7 +27,7 @@ std::optional<Image> Image::FromFile(const std::string& path)
 std::optional<Texture> Texture::FromImage(SDL_Renderer* renderer, const Image& image)
 {
     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, image.surface.get());
-    CheckSDL(texture);
+    SDLCheck(texture);
 
     Texture out {};
     out.handle = decltype(out.handle) { texture };

@@ -11,13 +11,17 @@ void ServerMessageHandler(TCPConnection& sender, const Message& msg)
     switch (msg.header.message_type)
     {
     case MessageType::ePING:
+    {
+        Log("Received a ping!");
         sender.Post({ MessageType::ePING, msg.body.data });
         break;
+    }
     case MessageType::eECHO:
     {
         std::string message = msg.body.data;
         std::reverse(message.begin(), message.end());
         sender.Post(Message(MessageType::eECHO, message));
+        break;
     }
     default:
         break;

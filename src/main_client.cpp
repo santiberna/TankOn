@@ -1,10 +1,5 @@
 #include <network/client.hpp>
-
-enum MessageType
-{
-    ePING = 0,
-    eECHO = 1
-};
+#include <network/message_types.hpp>
 
 void ClientMessageHandler(TCPConnection& sender, const Message& msg)
 {
@@ -42,16 +37,18 @@ int main(int argc, char* args[])
 
         while (true)
         {
-            // auto now = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
-            // auto msg = Message(PING, std::to_string(now.count()));
+            auto now = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
+            auto msg = Message(ePING, std::to_string(now.count()));
 
-            std::string echo {};
-            std::cout << "Send Message: ";
-            std::getline(std::cin, echo);
+            // std::string echo {};
+            // std::cout << "Send Message: ";
+            // std::getline(std::cin, echo);
 
-            client.Send(Message(MessageType::eECHO, echo));
+            client.Send(msg);
             client.WaitForMessage();
             client.ProcessMessages(ClientMessageHandler);
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         }
     }
     catch (const std::exception& e)

@@ -1,9 +1,8 @@
 #pragma once
-#include <memory>
 #include <utility/log.hpp>
 #include <SDL3/SDL_error.h>
 
-namespace hpp
+namespace sdl
 {
 
 template <typename T, auto Dx>
@@ -16,18 +15,18 @@ struct deleter
 };
 
 template <typename T, auto Dx>
-using unique_ptr = std::unique_ptr<T, deleter<T, Dx>>;
+using UniquePtr = std::unique_ptr<T, deleter<T, Dx>>;
 
 }
 
-#define CheckSDL(result)     \
+#define SDLCheck(result)     \
     if (!result)             \
     {                        \
         Log(SDL_GetError()); \
         return std::nullopt; \
     }
 
-inline void CheckErrorSDL(bool result)
+inline void SDLAbortIfFailed(bool result)
 {
     if (!result)
     {
