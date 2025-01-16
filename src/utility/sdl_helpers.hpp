@@ -26,6 +26,12 @@ using UniquePtr = std::unique_ptr<T, deleter<T, Dx>>;
         return std::nullopt; \
     }
 
+#define OptCheck(result)     \
+    if (!result)             \
+    {                        \
+        return std::nullopt; \
+    }
+
 inline void SDLAbortIfFailed(bool result)
 {
     if (!result)

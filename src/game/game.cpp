@@ -8,18 +8,44 @@
 Game::Game()
 {
     context = Context::Create().value();
+
     auto* renderer = context.GetRenderer();
-
-    Image base = Image::FromFile("assets/images/Tanks/TankBaseRed.png").value();
-    Image weapon = Image::FromFile("assets/images/Tanks/TankWeaponRed.png").value();
-
-    player_base_sprite = Texture::FromImage(renderer, base).value();
-    player_weapon_sprite = Texture::FromImage(renderer, weapon).value();
-
-    camera.translation = { kScreenWidth * 0.5f, kScreenHeight * 0.5f };
     SDL_SetRenderVSync(renderer, 1);
 
-    player.velocity = UP;
+    player_sprites.emplace_back(LoadPlayerSkin(renderer, "assets/images/Tanks/TankBaseRed.png", "assets/images/Tanks/TankWeaponRed.png").value());
+    player_sprites.emplace_back(LoadPlayerSkin(renderer, "assets/images/Tanks/TankBaseBlue.png", "assets/images/Tanks/TankWeaponBlue.png").value());
+}
+
+void Game::DrawPlayer(const Transform2D& camera, const PlayerData& player, uint32_t skin_id)
+{
+    auto* renderer = context.GetRenderer();
+
+    Transform2D p {};
+    p.translation = player.position;
+    Transform2D dst = (camera * p);
+
+    auto& skin = player_sprites[skin_id];
+
+    SDL_FRect baseRect = dst.CalcSpriteDst(skin.player_base_sprite.GetSpriteSize());
+    SDL_FRect weaponRect = dst.CalcSpriteDst(skin.player_weapon_sprite.GetSpriteSize());
+
+    SDLAbortIfFailed(SDL_RenderTextureRotated(
+        renderer,
+        skin.player_base_sprite.handle.get(),
+        nullptr,
+        &baseRect,
+        -glm::degrees(VectorAngle(UP, glm::normalize(player.velocity))),
+        nullptr,
+        SDL_FLIP_NONE));
+
+    SDLAbortIfFailed(SDL_RenderTextureRotated(
+        renderer,
+        skin.player_weapon_sprite.handle.get(),
+        nullptr,
+        &weaponRect,
+        player.rotation,
+        nullptr,
+        SDL_FLIP_NONE));
 }
 
 void Game::ClearScreen(const glm::vec3& colour)
@@ -30,24 +56,6 @@ void Game::ClearScreen(const glm::vec3& colour)
 
     SDL_SetRenderDrawColor(context.GetRenderer(), red, green, blue, 0xFF);
     SDLAbortIfFailed(SDL_RenderClear(context.GetRenderer()));
-}
-
-void Game::DrawMenuUI()
-{
-    ImGui::Begin("Main Menu");
-
-    ImGui::Text("IP to connect:");
-    ImGui::SameLine();
-
-    std::string ipv4 {};
-    ImGui::InputText("Input IP", &ipv4);
-
-    ImGui::Button("Connect to Game");
-
-    ImGui::Separator();
-    ImGui::Button("Host Game");
-
-    ImGui::End();
 }
 
 void Game::ProcessAllEvents()
@@ -65,32 +73,8 @@ void Game::ProcessAllEvents()
     }
 }
 
-void Game::RenderObjects()
+void Game::UpdatePlayer(PlayerData& player, const Transform2D& camera, DeltaMS deltatime)
 {
-    auto* renderer = context.GetRenderer();
-
-    Transform2D p {};
-    p.translation = player.position;
-    Transform2D dst = (camera * p);
-
-    SDL_FRect baseRect = dst.CalcSpriteDst(player_base_sprite.GetSpriteSize());
-    SDL_FRect weaponRect = dst.CalcSpriteDst(player_weapon_sprite.GetSpriteSize());
-
-    glm::vec2 tank_to_cursor = glm::normalize(input_handler.GetMousePos() - dst.translation);
-    float weapon_rotation = -glm::degrees(VectorAngle(UP, tank_to_cursor));
-
-    float base_rotation = -glm::degrees(VectorAngle(UP, glm::normalize(player.velocity)));
-
-    SDL_RenderTextureRotated(renderer, player_base_sprite.handle.get(), nullptr, &baseRect, base_rotation, nullptr, SDL_FLIP_NONE);
-    SDLAbortIfFailed(SDL_RenderTextureRotated(renderer, player_weapon_sprite.handle.get(), nullptr, &weaponRect, weapon_rotation, nullptr, SDL_FLIP_NONE));
-}
-
-void Game::UpdatePlayer()
-
-{
-    auto dt = delta_timer.GetElapsed();
-    delta_timer.Reset();
-
     glm::vec2 movement {};
 
     if (input_handler.GetKey(SDLK_W))
@@ -113,7 +97,12 @@ void Game::UpdatePlayer()
     if (glm::epsilonNotEqual(glm::length(movement), 0.0f, glm::epsilon<float>()))
     {
         movement = glm::normalize(movement);
-        player.velocity = movement * dt.count();
+        player.velocity = movement * deltatime.count();
         player.position += player.velocity;
     }
+
+    glm::vec2 player_screen = camera * player.position;
+    glm::vec2 tank_to_cursor = glm::normalize(input_handler.GetMousePos() - player_screen);
+
+    player.rotation = -glm::degrees(VectorAngle(UP, tank_to_cursor));
 }

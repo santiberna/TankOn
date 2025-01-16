@@ -1,4 +1,4 @@
-#include <network/connection.hpp>
+#include <network/connection/connection.hpp>
 
 void TCPConnection::HandleMessagePost(const Message& msg)
 {
@@ -16,7 +16,7 @@ void TCPConnection::HandleHeaderWrite(std::error_code ec, size_t)
 {
     if (ec)
     {
-        Log("Error: {}", ec.message());
+        // Log("Error: {}", ec.message());
         socket.close();
         return;
     }
@@ -45,7 +45,7 @@ void TCPConnection::HandleBodyWrite(std::error_code ec, size_t)
 {
     if (ec)
     {
-        Log("Error: {}", ec.message());
+        // Log("Error: {}", ec.message());
         socket.close();
         return;
     }
@@ -64,7 +64,7 @@ void TCPConnection::HandleHeaderRead(std::error_code ec, size_t)
 {
     if (ec)
     {
-        Log("Error: {}", ec.message());
+        // Log("Error: {}", ec.message());
         socket.close();
         return;
     }
@@ -89,7 +89,7 @@ void TCPConnection::HandleBodyRead(std::error_code ec, size_t)
 {
     if (ec)
     {
-        Log("Error: {}", ec.message());
+        // Log("Error: {}", ec.message());
         socket.close();
         return;
     }

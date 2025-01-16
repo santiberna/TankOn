@@ -1,16 +1,12 @@
 #include <string>
 #include <thread>
-#include <network/connection.hpp>
+#include <network/connection/connection.hpp>
 
 class TCPClient
 {
 public:
     TCPClient(const std::string& hostname, uint16_t port);
-
-    ~TCPClient()
-    {
-        Disconnect();
-    }
+    virtual ~TCPClient();
 
     bool IsConnected()
     {
@@ -23,32 +19,27 @@ public:
             connection->Post(msg);
     }
 
-    void Disconnect()
-    {
-        if (connection->GetSocket().is_open())
-        {
-            asio::post(context, [this]()
-                { connection->GetSocket().close(); });
-        }
-
-        context.stop();
-
-        if (context_thread.joinable())
-            context_thread.join();
-    }
-
-    void ProcessMessages(std::function<void(TCPConnection& connection, const Message&)> message_handler)
+    void ProcessMessages()
     {
         while (!messages_in.empty())
         {
             auto msg = messages_in.pop_front();
-            message_handler(*msg.sender, msg.message);
+            ProcessMessage(*msg.sender, msg.message);
         }
     }
 
     void WaitForMessage()
     {
         messages_in.wait_for_entries();
+    }
+
+protected:
+    void Disconnect();
+
+    virtual void ProcessMessage(
+        [[maybe_unused]] TCPConnection& sender,
+        [[maybe_unused]] const Message& message)
+    {
     }
 
 private:

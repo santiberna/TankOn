@@ -1,4 +1,4 @@
-#include <game/input.hpp>
+#include <game/backend/input.hpp>
 
 void InputData::ProcessEvent(const SDL_Event& e)
 {

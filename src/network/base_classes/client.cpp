@@ -1,4 +1,4 @@
-#include <network/client.hpp>
+#include <network/base_classes/client.hpp>
 
 TCPClient::TCPClient(const std::string& hostname, uint16_t port)
 {
@@ -13,4 +13,23 @@ TCPClient::TCPClient(const std::string& hostname, uint16_t port)
 
     context_thread = std::thread([this]()
         { context.run(); });
+}
+
+TCPClient::~TCPClient()
+{
+    Disconnect();
+}
+
+void TCPClient::Disconnect()
+{
+    if (connection->GetSocket().is_open())
+    {
+        asio::post(context, [this]()
+            { connection->GetSocket().close(); });
+    }
+
+    context.stop();
+
+    if (context_thread.joinable())
+        context_thread.join();
 }

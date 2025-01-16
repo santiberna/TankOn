@@ -1,6 +1,7 @@
+#pragma once
+
 #include <glm/vec2.hpp>
 #include <SDL3/SDL_rect.h>
-
 #include <glm/mat3x3.hpp>
 
 // Does not handle rotation
@@ -17,11 +18,18 @@ public:
         };
     }
 
-    Transform2D operator*(const Transform2D& operand)
+    Transform2D operator*(const Transform2D& operand) const
     {
         glm::vec2 out_scale = scale * operand.scale;
         glm::vec2 out_translation = scale * operand.translation + translation;
         return { out_translation, out_scale };
+    }
+
+    glm::vec2 operator*(const glm::vec2& operand) const
+    {
+        float x = operand.x * scale.x + translation.x;
+        float y = operand.y * scale.y + translation.y;
+        return { x, y };
     }
 
     glm::vec2 translation {};

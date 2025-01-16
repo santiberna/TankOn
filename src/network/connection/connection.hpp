@@ -1,8 +1,8 @@
 #pragma once
 
 #include <network/network_common.hpp>
-#include <network/ts_deque.hpp>
-#include <network/message.hpp>
+#include <network/containers/ts_deque.hpp>
+#include <network/containers/message.hpp>
 #include <utility/log.hpp>
 
 class TCPConnection;
@@ -42,6 +42,9 @@ public:
         asio::async_read(socket, buffer, BindMember(this, &TCPConnection::HandleHeaderRead));
     }
 
+    void SetId(uint32_t set_id) { id = set_id; }
+    uint32_t GetId() const { return id; }
+
 private:
     void HandleMessagePost(const Message& msg);
 
@@ -51,6 +54,7 @@ private:
     void HandleBodyRead(std::error_code ec, size_t);
 
 private:
+    uint32_t id = 0;
     TSDeque<OwnedMessage>& messages_in;
     asio::io_context& context;
     asio::ip::tcp::socket socket;
