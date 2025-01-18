@@ -7,18 +7,18 @@
 
 Game::Game()
 {
-    context = Context::Create().value();
+    renderer = Renderer::Create().value();
 
-    auto* renderer = context.GetRenderer();
-    SDL_SetRenderVSync(renderer, 1);
+    auto* r = renderer.GetRenderer();
+    SDL_SetRenderVSync(r, 1);
 
-    player_sprites.emplace_back(LoadPlayerSkin(renderer, "assets/images/Tanks/TankBaseRed.png", "assets/images/Tanks/TankWeaponRed.png").value());
-    player_sprites.emplace_back(LoadPlayerSkin(renderer, "assets/images/Tanks/TankBaseBlue.png", "assets/images/Tanks/TankWeaponBlue.png").value());
+    player_sprites.emplace_back(LoadPlayerSkin(r, "assets/images/Tanks/TankBaseRed.png", "assets/images/Tanks/TankWeaponRed.png").value());
+    player_sprites.emplace_back(LoadPlayerSkin(r, "assets/images/Tanks/TankBaseBlue.png", "assets/images/Tanks/TankWeaponBlue.png").value());
 }
 
 void Game::DrawPlayer(const Transform2D& camera, const PlayerData& player, uint32_t skin_id)
 {
-    auto* renderer = context.GetRenderer();
+    auto* r = renderer.GetRenderer();
 
     Transform2D p {};
     p.translation = player.position;
@@ -30,7 +30,7 @@ void Game::DrawPlayer(const Transform2D& camera, const PlayerData& player, uint3
     SDL_FRect weaponRect = dst.CalcSpriteDst(skin.player_weapon_sprite.GetSpriteSize());
 
     SDLAbortIfFailed(SDL_RenderTextureRotated(
-        renderer,
+        r,
         skin.player_base_sprite.handle.get(),
         nullptr,
         &baseRect,
@@ -39,23 +39,13 @@ void Game::DrawPlayer(const Transform2D& camera, const PlayerData& player, uint3
         SDL_FLIP_NONE));
 
     SDLAbortIfFailed(SDL_RenderTextureRotated(
-        renderer,
+        r,
         skin.player_weapon_sprite.handle.get(),
         nullptr,
         &weaponRect,
         player.rotation,
         nullptr,
         SDL_FLIP_NONE));
-}
-
-void Game::ClearScreen(const glm::vec3& colour)
-{
-    uint8_t red = static_cast<uint8_t>(colour.x * 255.0f);
-    uint8_t green = static_cast<uint8_t>(colour.y * 255.0f);
-    uint8_t blue = static_cast<uint8_t>(colour.z * 255.0f);
-
-    SDL_SetRenderDrawColor(context.GetRenderer(), red, green, blue, 0xFF);
-    SDLAbortIfFailed(SDL_RenderClear(context.GetRenderer()));
 }
 
 void Game::ProcessAllEvents()

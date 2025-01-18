@@ -1,6 +1,6 @@
 #pragma once
 #include <game/states/base_state.hpp>
-#include <game/backend/context.hpp>
+#include <game/backend/renderer.hpp>
 #include <game/backend/input.hpp>
 #include <resources/texture.hpp>
 #include <utility/timer.hpp>
@@ -31,7 +31,7 @@ public:
         game_state->ExecuteFrame(*this, deltatime);
     }
 
-    Context context {};
+    Renderer renderer {};
     InputData input_handler {};
     std::vector<PlayerSkin> player_sprites {};
 
@@ -40,7 +40,6 @@ public:
 
     Game();
 
-    void ClearScreen(const glm::vec3& colour);
     void DrawPlayer(const Transform2D& camera, const PlayerData& player, uint32_t skin_id);
     void UpdatePlayer(PlayerData& out_data, const Transform2D& camera, DeltaMS deltatime);
     void ProcessAllEvents();

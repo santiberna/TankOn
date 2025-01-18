@@ -10,7 +10,7 @@ int main(int, char*[])
     {
         Game game {};
         game.SetGameState(new MainMenuState());
-        imgui_shortcuts::InitSDL3(game.context.GetWindow(), game.context.GetRenderer());
+        imgui_shortcuts::InitSDL3(game.renderer.GetWindow(), game.renderer.GetRenderer());
 
         while (!game.should_quit)
         {
@@ -19,8 +19,8 @@ int main(int, char*[])
             game.ProcessAllEvents();
             game.ExecuteFrame();
 
-            imgui_shortcuts::EndFrame(game.context.GetRenderer());
-            SDL_RenderPresent(game.context.GetRenderer());
+            imgui_shortcuts::EndFrame(game.renderer.GetRenderer());
+            SDL_RenderPresent(game.renderer.GetRenderer());
         }
 
         imgui_shortcuts::ShutdownSDL3();

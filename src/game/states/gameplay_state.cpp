@@ -29,7 +29,7 @@ void GameplayState::ExecuteFrame(Game& game, DeltaMS deltatime)
 
     client->Send(AsMessage(MessageType::eUPDATE_PLAYER, std::make_pair(client->GetCurrentPlayerID(), current_player)));
 
-    game.ClearScreen(glm::vec3(194.0f / 255.0f, 178.0f / 255.0f, 0.5f));
+    game.renderer.ClearScreen(194, 178, 128);
 
     auto& world = client->GetAllPlayers();
     for (auto&& [id, player] : world.players)

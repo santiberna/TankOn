@@ -23,16 +23,6 @@ file(GLOB_RECURSE source CONFIGURE_DEPENDS
 
 target_sources(${PROJECT_NAME} PRIVATE ${source})
 
-# add_executable(${PROJECT_NAME}Client "main_client.cpp")
-# target_link_libraries(${PROJECT_NAME}Client PRIVATE ${PROJECT_NAME})
-# target_output_directory(${PROJECT_NAME}Client ${CMAKE_BINARY_DIR})
-
-
-# add_executable(${PROJECT_NAME}Server "main_server.cpp")
-# target_link_libraries(${PROJECT_NAME}Server PRIVATE ${PROJECT_NAME})
-# target_output_directory(${PROJECT_NAME}Server ${CMAKE_BINARY_DIR})
-
-
 add_executable(${PROJECT_NAME}Game "main.cpp")
 target_link_libraries(${PROJECT_NAME}Game PRIVATE ${PROJECT_NAME})
 target_output_directory(${PROJECT_NAME}Game ${CMAKE_BINARY_DIR})

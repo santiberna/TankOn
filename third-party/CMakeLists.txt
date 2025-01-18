@@ -45,7 +45,8 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 
 if (WIN32)
     set(BOOST_ROOT "C:/Program Files/Boost/boost_1_86_0")
-    target_compile_definitions(ThirdParty INTERFACE _WIN32_WINDOWS)
+    target_compile_definitions(ThirdParty 
+        INTERFACE _WIN32_WINNT=0x0602)
 endif ()
 
 find_package(Boost 1.50 REQUIRED COMPONENTS)
@@ -92,6 +93,10 @@ target_sources(ImGui PRIVATE
     "imgui/backends/imgui_impl_sdlrenderer3.cpp"
     )
 
+# STB
+
+add_subdirectory(stb)
+
 # LINK DEPENDENCIES
 
 target_include_directories(ThirdParty
@@ -107,5 +112,6 @@ target_link_libraries(ThirdParty
     INTERFACE glm::glm
     INTERFACE cereal::cereal
     INTERFACE ImGui
+    INTERFACE STB
     ${Boost_LIBRARIES}
     )

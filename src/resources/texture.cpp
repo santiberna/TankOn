@@ -1,5 +1,5 @@
 #include <resources/texture.hpp>
-#include <resources/stb_image.h>
+#include <stb/stb_image.h>
 
 std::optional<Image> Image::FromFile(const std::string& path)
 {
