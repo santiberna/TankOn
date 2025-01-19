@@ -8,7 +8,7 @@ GameplayState::GameplayState(std::unique_ptr<GameServer>&& server, std::unique_p
     , server(std::move(server))
     , client(std::move(client))
 {
-    camera.translation = { kScreenWidth * 0.5f, kScreenHeight * 0.5f };
+    camera.translation = { 1600 * 0.5f, 900 * 0.5f };
     camera.scale = { 0.4f, 0.4f };
 }
 

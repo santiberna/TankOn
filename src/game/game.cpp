@@ -7,7 +7,7 @@
 
 Game::Game()
 {
-    renderer = Renderer::Create().value();
+    renderer = Renderer::Create(1600, 900).value();
 
     auto* r = renderer.GetRenderer();
     SDL_SetRenderVSync(r, 1);

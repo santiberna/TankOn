@@ -7,6 +7,7 @@
 #include <game/gameplay/player.hpp>
 #include <math/transform2d.hpp>
 #include <math/world.hpp>
+#include <resources/font.hpp>
 
 class Game
 {
