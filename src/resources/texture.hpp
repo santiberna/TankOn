@@ -25,6 +25,14 @@ class Texture
 {
 public:
     static std::optional<Texture> FromImage(SDL_Renderer* renderer, const Image& image);
+
+    static std::shared_ptr<Texture> SharedFromImage(SDL_Renderer* renderer, const Image& image)
+    {
+        if (auto texture = FromImage(renderer, image))
+            return std::make_shared<Texture>(std::move(texture.value()));
+        return nullptr;
+    }
+
     glm::vec2 GetSpriteSize() const;
 
     sdl::UniquePtr<SDL_Texture, SDL_DestroyTexture> handle {};

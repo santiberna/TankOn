@@ -47,6 +47,8 @@ std::optional<Texture> Texture::FromImage(SDL_Renderer* renderer, const Image& i
     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, image.surface.get());
     SDLCheck(texture);
 
+    SDLCheck(SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND));
+
     Texture out {};
     out.handle = decltype(out.handle) { texture };
     return out;

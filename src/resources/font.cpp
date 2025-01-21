@@ -3,7 +3,7 @@
 #include <stb/stb_truetype.h>
 #include <math/rect_pack.hpp>
 
-std::optional<Font> Font::LoadFromFile(SDL_Renderer* renderer, const std::string& font_file, const std::vector<Unicode::CodepointPair>& codepoint_ranges, float resolutionY, uint32_t margin, const glm::uvec2& initial_packing_area)
+std::optional<Font> Font::FromFile(SDL_Renderer* renderer, const std::string& font_file, const FontLoadInfo& load_info)
 {
     std::vector<std::byte> font_data {};
     stbtt_fontinfo font {};
@@ -23,14 +23,14 @@ std::optional<Font> Font::LoadFromFile(SDL_Renderer* renderer, const std::string
     }
 
     FontMetrics metrics {};
-    float font_scale = stbtt_ScaleForPixelHeight(&font, resolutionY);
+    float font_scale = stbtt_ScaleForPixelHeight(&font, load_info.resolutionY);
 
     // Get general metrics
     {
         int line_gap, ascent, descent;
         stbtt_GetFontVMetrics(&font, &ascent, &descent, &line_gap);
 
-        metrics.resolution = resolutionY;
+        metrics.resolution = load_info.resolutionY;
         metrics.ascent = (float)ascent * font_scale;
         metrics.descent = (float)descent * font_scale;
         metrics.line_gap = (float)line_gap * font_scale;
@@ -39,7 +39,7 @@ std::optional<Font> Font::LoadFromFile(SDL_Renderer* renderer, const std::string
     // Find all codepoints
     std::vector<Unicode::Codepoint> codepoints_found {};
 
-    for (const auto& range : codepoint_ranges)
+    for (const auto& range : load_info.codepoint_ranges)
     {
         for (uint32_t i = range.first; i < range.second; i++)
         {
@@ -102,7 +102,10 @@ std::optional<Font> Font::LoadFromFile(SDL_Renderer* renderer, const std::string
             codepoint_rects.emplace_back(glm::uvec2(codepoint_info[codepoint].size));
         }
 
-        packed_codepoints = RectPack::PackRectanglesUntilSuccess(codepoint_rects, initial_packing_area, margin);
+        packed_codepoints = RectPack::PackRectanglesUntilSuccess(
+            codepoint_rects,
+            load_info.initial_atlas_packing_area,
+            load_info.atlas_margin);
     }
 
     // Render into Atlas

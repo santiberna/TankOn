@@ -19,14 +19,24 @@ struct CodepointInfo
     float left_bearing {};
 };
 
+struct FontLoadInfo
+{
+    std::vector<Unicode::CodepointPair> codepoint_ranges { Unicode::ASCII_CODESET };
+    glm::uvec2 initial_atlas_packing_area { 128, 128 };
+    float resolutionY = 32.0f;
+    uint32_t atlas_margin = 1;
+};
+
 class Font
 {
 public:
-    static std::optional<Font> LoadFromFile(
-        SDL_Renderer* renderer,
-        const std::string& font_file,
-        const std::vector<Unicode::CodepointPair>& codepoint_ranges,
-        float resolutionY, uint32_t margin, const glm::uvec2& initial_packing_area);
+    static std::optional<Font> FromFile(SDL_Renderer* renderer, const std::string& font_file, const FontLoadInfo& load_params);
+    static std::shared_ptr<Font> SharedFromFile(SDL_Renderer* renderer, const std::string& font_file, const FontLoadInfo& load_params)
+    {
+        if (auto font = FromFile(renderer, font_file, load_params))
+            return std::make_shared<Font>(std::move(font.value()));
+        return nullptr;
+    }
 
     const Texture& GetAtlasTexture() const { return font_atlas; }
 

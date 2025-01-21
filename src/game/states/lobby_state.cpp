@@ -6,7 +6,7 @@
 
 void LobbyState::ExecuteFrame(Game& game, DeltaMS deltatime)
 {
-    game.renderer.ClearScreen(0, 0, 0);
+    game.renderer.ClearScreen({ 0.0f, 0.0f, 0.0f });
 
     if (!client->IsConnected())
     {

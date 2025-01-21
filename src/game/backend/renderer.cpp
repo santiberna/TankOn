@@ -18,20 +18,20 @@ std::optional<Renderer> Renderer::Create(uint32_t window_width, uint32_t window_
     return out;
 }
 
-void Renderer::ClearScreen(uint8_t r, uint8_t g, uint8_t b)
+void Renderer::ClearScreen(const glm::vec3& colour)
 {
-    SDL_SetRenderDrawColor(renderer.get(), r, g, b, 0xFF);
+    SDLAbortIfFailed(SDL_SetRenderDrawColorFloat(renderer.get(), colour.x, colour.y, colour.z, 1.0f));
     SDLAbortIfFailed(SDL_RenderClear(renderer.get()));
 }
 
 void Renderer::RenderSprite(
     const Texture& sprite,
     const glm::vec2& screen_pos,
-    const glm::vec2& screen_size,
+    const glm::vec2& scale,
     float rotation)
 {
-    float width = sprite.GetSpriteSize().x * screen_size.x;
-    float height = sprite.GetSpriteSize().y * screen_size.y;
+    float width = sprite.GetSpriteSize().x * scale.x;
+    float height = sprite.GetSpriteSize().y * scale.y;
 
     SDL_FRect draw_dst {
         screen_pos.x - width * 0.5f, screen_pos.y - height * 0.5f, width, height
@@ -47,12 +47,31 @@ void Renderer::RenderSprite(
         SDL_FLIP_NONE));
 }
 
+void Renderer::RenderSpriteRect(
+    const Texture& sprite,
+    const glm::vec2& screen_pos,
+    const glm::vec2& screen_size)
+{
+    SDL_FRect draw_dst {
+        screen_pos.x - screen_size.x * 0.5f, screen_pos.y - screen_size.y * 0.5f, screen_size.x, screen_size.y
+    };
+
+    SDLAbortIfFailed(SDL_RenderTexture(
+        renderer.get(),
+        sprite.handle.get(),
+        nullptr,
+        &draw_dst));
+}
+
 void Renderer::RenderText(
     const TextBox& text,
     const glm::vec2& position,
-    uint32_t colour)
+    const glm::vec4& colour)
 {
     auto* sprite_atlas = text.GetFont().GetAtlasTexture().handle.get();
+    SDL_SetTextureColorModFloat(sprite_atlas, colour.x, colour.y, colour.z);
+    SDL_SetTextureAlphaModFloat(sprite_atlas, colour.w);
+
     glm::vec2 center_offset = (-text.GetTotalSize() * 0.5f) + position;
 
     for (const auto& c : text)
@@ -79,7 +98,7 @@ void Renderer::RenderText(
 void Renderer::RenderDebugRect(
     const glm::vec2& position,
     const glm::vec2& size,
-    uint32_t colour)
+    const glm::vec4& colour)
 {
     SDL_FRect rect {};
     rect.x = position.x - size.x * 0.5f;
@@ -87,6 +106,12 @@ void Renderer::RenderDebugRect(
     rect.w = size.x;
     rect.h = size.y;
 
-    SDLAbortIfFailed(SDL_SetRenderDrawColor(renderer.get(), colour >> 24, colour >> 16, colour >> 8, 0xFF));
+    SDLAbortIfFailed(SDL_SetRenderDrawColorFloat(renderer.get(), colour.x, colour.y, colour.z, colour.w));
     SDLAbortIfFailed(SDL_RenderRect(renderer.get(), &rect));
+}
+
+void Renderer::RenderButton(const Button& button)
+{
+    RenderSpriteRect(button.GetSprite(), button.position, button.size);
+    RenderText(button.GetTextBox(), button.position, { 1.0f, 1.0f, 1.0f, 1.0f });
 }

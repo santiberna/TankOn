@@ -1,3 +1,4 @@
+#pragma once
 #include <resources/font.hpp>
 
 struct CodepointDrawData
@@ -9,20 +10,20 @@ struct CodepointDrawData
 class TextBox
 {
 public:
-    TextBox(Font& font)
+    TextBox(std::shared_ptr<Font> font)
         : font(font)
     {
     }
 
     void SetText(const Unicode::String& text);
     glm::vec2 GetTotalSize() const { return total_size; }
-    const Font& GetFont() const { return font; }
+    const Font& GetFont() const { return *font; }
 
     auto begin() const { return codepoint_sequence.begin(); }
     auto end() const { return codepoint_sequence.end(); }
 
 private:
-    Font& font;
+    std::shared_ptr<Font> font;
     std::vector<CodepointDrawData> codepoint_sequence {};
     glm::vec2 total_size {};
 };

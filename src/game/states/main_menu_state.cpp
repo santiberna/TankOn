@@ -7,7 +7,7 @@
 
 void MainMenuState::ExecuteFrame(Game& game, DeltaMS deltatime)
 {
-    game.renderer.ClearScreen(0, 0, 0);
+    game.renderer.ClearScreen({ 0.0f, 0.0f, 0.0f });
 
     ImGui::Begin("Main Menu");
 

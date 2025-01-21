@@ -2,6 +2,7 @@
 #include <SDL3/SDL_main.h>
 #include <utility/imgui_common.hpp>
 #include <game/states/main_menu_state.hpp>
+#include <utility/colours.hpp>
 
 int main(int, char*[])
 {
@@ -12,35 +13,36 @@ int main(int, char*[])
         game.SetGameState(new MainMenuState());
         imgui_shortcuts::InitSDL3(game.renderer.GetWindow(), game.renderer.GetRenderer());
 
-        Font text_font = Font::LoadFromFile(
+        auto text_font = Font::SharedFromFile(
             game.renderer.GetRenderer(),
-            "assets/fonts/CleanCafe.otf",
-            { Unicode::ASCII_CODESET },
-            32, 1, { 128, 128 })
-                             .value();
+            "C:/Windows/Fonts/arial.ttf",
+            {});
 
-        TextBox test_box = TextBox(text_font);
+        Image white = Image::New(100, 100, 0xFFFFFFFF).value();
 
-        Unicode::String text {};
+        TextBox test_text = TextBox(text_font);
+        test_text.SetText(Unicode::ASCII_to_Unicode("the brown fox jumps over the lazy dog"));
 
-        test_box.SetText(Unicode::ASCII_to_Unicode("Hello World!"));
+        Button button = Button(
+            text_font,
+            Texture::SharedFromImage(game.renderer.GetRenderer(), white),
+            { 600.0f, 600.0f }, { 100.0f, 100.0f });
+
+        button.SetText(Unicode::ASCII_to_Unicode("the brown fox jumps over the lazy dog"));
 
         while (!game.should_quit)
         {
             imgui_shortcuts::StartFrame();
 
             game.ProcessAllEvents();
-            game.ExecuteFrame();
+            // game.ExecuteFrame();
 
-            game.renderer.RenderText(test_box, { 600.0f, 600.0f }, 0xFFFFFFFF);
-            game.renderer.RenderDebugRect({ 600.0f, 600.0f }, test_box.GetTotalSize(), 0x00FF00FF);
+            game.renderer.ClearScreen(colour::BLACK);
+            game.renderer.RenderText(test_text, { 600.0f, 400.0f }, { 1.0f, 1.0f, 1.0f, 1.0f });
+            game.renderer.RenderButton(button);
 
             imgui_shortcuts::EndFrame(game.renderer.GetRenderer());
             SDL_RenderPresent(game.renderer.GetRenderer());
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
-            text.push_back(char32_t('a'));
-            test_box.SetText(text);
         }
 
         imgui_shortcuts::ShutdownSDL3();
