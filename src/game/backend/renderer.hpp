@@ -34,7 +34,8 @@ public:
     void RenderSpriteRect(
         const Texture& sprite,
         const glm::vec2& screen_pos,
-        const glm::vec2& screen_size);
+        const glm::vec2& screen_size,
+        const glm::vec4& colour_mult);
 
     void RenderText(
         const TextBox& text,

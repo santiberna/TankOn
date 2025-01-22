@@ -1,6 +1,6 @@
 #include <ui/text_box.hpp>
 
-void TextBox::SetText(const Unicode::String& text)
+void TextBox::SetText(const unicode::String& text)
 {
     codepoint_sequence.clear();
 

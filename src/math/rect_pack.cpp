@@ -27,7 +27,13 @@ std::optional<RectPack::PackResult> RectPack::PackRectangles(const std::vector<g
         for (size_t i = 0; i < out.size(); i++)
         {
             auto& rect = stb_rects[i];
-            out[i] = { (int)(rect.x + margin), (int)(rect.y + margin), (int)(rect.w - margin), (int)(rect.h - margin) };
+
+            out[i] = {
+                (int)(rect.x + margin),
+                (int)(rect.y + margin),
+                (int)(rect.w - (margin * 2)),
+                (int)(rect.h - (margin * 2))
+            };
         }
 
         return PackResult { out, packing_area };

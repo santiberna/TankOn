@@ -18,17 +18,17 @@ int main(int, char*[])
             "C:/Windows/Fonts/arial.ttf",
             {});
 
-        Image white = Image::New(100, 100, 0xFFFFFFFF).value();
+        Image white = Image::New(10, 10, 0xFF888888).value();
+        auto button_texture = Texture::SharedFromImage(game.renderer.GetRenderer(), white);
 
-        TextBox test_text = TextBox(text_font);
-        test_text.SetText(Unicode::ASCII_to_Unicode("the brown fox jumps over the lazy dog"));
+        Button button = Button(text_font, button_texture, { 400.0f, 400.0f }, { 200.0f, 100.0f });
+        button.SetText(unicode::FromASCII("Press to Play"));
+        button.hover_mult = { 1.5f, 1.5f, 1.5f, 1.0f };
+        button.press_mult = { 0.5f, 0.5f, 0.5f, 1.0f };
+        button.text_colour = { 0.3f, 0.3f, 0.3f, 1.0f };
 
-        Button button = Button(
-            text_font,
-            Texture::SharedFromImage(game.renderer.GetRenderer(), white),
-            { 600.0f, 600.0f }, { 100.0f, 100.0f });
-
-        button.SetText(Unicode::ASCII_to_Unicode("the brown fox jumps over the lazy dog"));
+        button.SetClickEvent([]()
+            { Log("Pressed Button!"); });
 
         while (!game.should_quit)
         {
@@ -37,8 +37,10 @@ int main(int, char*[])
             game.ProcessAllEvents();
             // game.ExecuteFrame();
 
+            auto& input = game.input_handler;
+            button.UpdateButton(input.GetMousePos(), input.GetButton(SDL_BUTTON_LEFT));
+
             game.renderer.ClearScreen(colour::BLACK);
-            game.renderer.RenderText(test_text, { 600.0f, 400.0f }, { 1.0f, 1.0f, 1.0f, 1.0f });
             game.renderer.RenderButton(button);
 
             imgui_shortcuts::EndFrame(game.renderer.GetRenderer());

@@ -1,5 +1,6 @@
 #include <resources/texture.hpp>
 #include <stb/stb_image.h>
+#include <stb/stb_image_write.h>
 
 std::optional<Image> Image::New(size_t width, size_t height, uint32_t default_val)
 {
@@ -36,10 +37,23 @@ std::optional<Image> Image::FromFile(const std::string& path)
     return out;
 }
 
-void Image::BlitFrom(const Image& image, const SDL_Rect* src_rect, const SDL_Rect* dst_rect)
+void Image::CopyFrom(const Image& image, const SDL_Rect& dst_rect)
 {
-    SDLAbortIfFailed(SDL_BlitSurface(
-        image.surface.get(), src_rect, surface.get(), dst_rect));
+    glm::uvec2 src_size = { image.surface->w, image.surface->h };
+
+    for (int j = 0; j < dst_rect.h; j++)
+    {
+        for (int i = 0; i < dst_rect.w; i++)
+        {
+            glm::uvec2 pixel_pos = { dst_rect.x + i, dst_rect.y + j };
+            data.at(pixel_pos.y * surface->w + pixel_pos.x) = image.data.at(j * image.surface->w + i);
+        }
+    }
+}
+
+void Image::SaveAsPNG(const std::string& path)
+{
+    stbi_write_png(path.c_str(), surface->w, surface->h, 4, data.data(), 4 * surface->w);
 }
 
 std::optional<Texture> Texture::FromImage(SDL_Renderer* renderer, const Image& image)
@@ -47,7 +61,7 @@ std::optional<Texture> Texture::FromImage(SDL_Renderer* renderer, const Image& i
     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, image.surface.get());
     SDLCheck(texture);
 
-    SDLCheck(SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND));
+    SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
 
     Texture out {};
     out.handle = decltype(out.handle) { texture };

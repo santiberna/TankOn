@@ -37,7 +37,7 @@ std::optional<Font> Font::FromFile(SDL_Renderer* renderer, const std::string& fo
     }
 
     // Find all codepoints
-    std::vector<Unicode::Codepoint> codepoints_found {};
+    std::vector<unicode::Codepoint> codepoints_found {};
 
     for (const auto& range : load_info.codepoint_ranges)
     {
@@ -52,7 +52,7 @@ std::optional<Font> Font::FromFile(SDL_Renderer* renderer, const std::string& fo
 
     // Collect all kerning data
 
-    std::unordered_map<Unicode::CodepointPair, float> kerning_table {};
+    std::unordered_map<unicode::CodepointPair, float> kerning_table {};
 
     for (size_t i = 0; i < codepoints_found.size(); i++)
     {
@@ -72,7 +72,7 @@ std::optional<Font> Font::FromFile(SDL_Renderer* renderer, const std::string& fo
 
     // Collect codepoint metrics
 
-    std::unordered_map<Unicode::Codepoint, CodepointInfo> codepoint_info {};
+    std::unordered_map<unicode::Codepoint, CodepointInfo> codepoint_info {};
 
     for (auto codepoint : codepoints_found)
     {
@@ -119,34 +119,45 @@ std::optional<Font> Font::FromFile(SDL_Renderer* renderer, const std::string& fo
 
     for (size_t i = 0; i < codepoints_found.size(); i++)
     {
+        auto rect = packed_codepoints.packed_rects.at(i);
+
+        if (rect.h == 0 || rect.w == 0)
+            continue;
+
         auto codepoint = codepoints_found[i];
         codepoint_info[codepoint].atlas_index = i;
-
-        auto rect = packed_codepoints.packed_rects.at(i);
 
         int width, height, x_off, y_off;
         uint8_t* render = stbtt_GetCodepointBitmap(&font, font_scale, font_scale, codepoint, &width, &height, &x_off, &y_off);
 
-        std::vector<uint32_t> character_image = std::vector<uint32_t>((size_t)width * (size_t)height, 0);
-        for (int j = 0; j < height; j++)
+        if (render)
         {
-            for (int i = 0; i < width; i++)
+
+            for (int j = 0; j < height; j++)
             {
-                size_t index = j * width + i;
-                uint32_t pixel_val = (uint32_t)(render[index]);
-                character_image.at(index) = pixel_val << 24 | pixel_val << 16 | pixel_val << 8 | 0xFF;
+                for (int i = 0; i < width; i++)
+                {
+                    size_t char_index = j * width + i;
+                    size_t atlas_index = (j + rect.y) * font_atlas.surface->w + (i + rect.x);
+
+                    uint32_t pixel_val = SDL_MapSurfaceRGBA(font_atlas.surface.get(), 0xFF, 0xFF, 0xFF, render[char_index]);
+                    font_atlas.data.at(atlas_index) = pixel_val;
+                }
             }
+
+            stbtt_FreeBitmap(render, nullptr);
         }
 
-        stbtt_FreeBitmap(render, nullptr);
-
-        auto codepoint_surface = Image::FromData(width, height, std::move(character_image));
-        if (!codepoint_surface)
+        for (auto pixel : font_atlas.data)
         {
-            return std::nullopt;
-        }
+            uint8_t r = pixel >> 16;
+            uint8_t g = pixel >> 8;
+            uint8_t b = pixel;
 
-        font_atlas.BlitFrom(codepoint_surface.value(), nullptr, &rect);
+            assert(r == 0xFF || r == 0);
+            assert(g == 0xFF || g == 0);
+            assert(b == 0xFF || b == 0);
+        }
     }
 
     Font out {};
@@ -168,16 +179,16 @@ std::optional<Font> Font::FromFile(SDL_Renderer* renderer, const std::string& fo
     return out;
 }
 
-CodepointInfo Font::GetCodepointInfo(Unicode::Codepoint codepoint) const
+CodepointInfo Font::GetCodepointInfo(unicode::Codepoint codepoint) const
 {
     if (auto it = codepoint_data.find(codepoint); it != codepoint_data.end())
     {
         return it->second;
     }
-    return codepoint_data.find(Unicode::MISSING_CODEPOINT)->second;
+    return codepoint_data.find(unicode::MISSING_CODEPOINT)->second;
 }
 
-float Font::GetKerning(Unicode::Codepoint first, Unicode::Codepoint next) const
+float Font::GetKerning(unicode::Codepoint first, unicode::Codepoint next) const
 {
     if (auto it = kerning_table.find({ first, next }); it != kerning_table.end())
     {

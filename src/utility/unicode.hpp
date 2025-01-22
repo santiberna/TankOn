@@ -1,7 +1,7 @@
 #include <string>
 #include <string_view>
 
-namespace Unicode
+namespace unicode
 {
 
 using Codepoint = char32_t;
@@ -16,7 +16,7 @@ constexpr Codepoint MISSING_CODEPOINT = 0x3F;
 
 constexpr std::pair<Codepoint, Codepoint> ASCII_CODESET = { 1, 128 };
 
-inline String ASCII_to_Unicode(const std::string& string)
+inline String FromASCII(const std::string& string)
 {
     String out {};
     out.reserve(string.size());
@@ -37,18 +37,18 @@ namespace std
 {
 
 template <>
-struct hash<Unicode::CodepointPair>
+struct hash<unicode::CodepointPair>
 {
-    std::size_t operator()(const Unicode::CodepointPair& k) const noexcept
+    std::size_t operator()(const unicode::CodepointPair& k) const noexcept
     {
         return ((size_t)(k.first) << 32) | k.second;
     }
 };
 
 template <>
-struct equal_to<Unicode::CodepointPair>
+struct equal_to<unicode::CodepointPair>
 {
-    bool operator()(const Unicode::CodepointPair& lhs, const Unicode::CodepointPair& rhs) const noexcept
+    bool operator()(const unicode::CodepointPair& lhs, const unicode::CodepointPair& rhs) const noexcept
     {
         return lhs.first == rhs.first && lhs.second == rhs.second;
     }

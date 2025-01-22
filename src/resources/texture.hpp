@@ -14,7 +14,8 @@ public:
     static std::optional<Image> FromData(size_t width, size_t height, std::vector<uint32_t>&& data);
     static std::optional<Image> FromFile(const std::string& path);
 
-    void BlitFrom(const Image& source, const SDL_Rect* src_rect, const SDL_Rect* dst_rect);
+    void CopyFrom(const Image& source, const SDL_Rect& dst_rect);
+    void SaveAsPNG(const std::string& path);
 
     std::vector<uint32_t> data {};
     sdl::UniquePtr<SDL_Surface, SDL_DestroySurface> surface;
@@ -25,7 +26,6 @@ class Texture
 {
 public:
     static std::optional<Texture> FromImage(SDL_Renderer* renderer, const Image& image);
-
     static std::shared_ptr<Texture> SharedFromImage(SDL_Renderer* renderer, const Image& image)
     {
         if (auto texture = FromImage(renderer, image))

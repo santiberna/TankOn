@@ -21,7 +21,7 @@ struct CodepointInfo
 
 struct FontLoadInfo
 {
-    std::vector<Unicode::CodepointPair> codepoint_ranges { Unicode::ASCII_CODESET };
+    std::vector<unicode::CodepointPair> codepoint_ranges { unicode::ASCII_CODESET };
     glm::uvec2 initial_atlas_packing_area { 128, 128 };
     float resolutionY = 32.0f;
     uint32_t atlas_margin = 1;
@@ -47,14 +47,14 @@ public:
         return codepoint_rects.at(index);
     }
 
-    CodepointInfo GetCodepointInfo(Unicode::Codepoint codepoint) const;
-    float GetKerning(Unicode::Codepoint first, Unicode::Codepoint next) const;
+    CodepointInfo GetCodepointInfo(unicode::Codepoint codepoint) const;
+    float GetKerning(unicode::Codepoint first, unicode::Codepoint next) const;
 
 private:
     // Font metrics
     FontMetrics font_metrics {};
-    std::unordered_map<Unicode::Codepoint, CodepointInfo> codepoint_data {};
-    std::unordered_map<Unicode::CodepointPair, float> kerning_table {};
+    std::unordered_map<unicode::Codepoint, CodepointInfo> codepoint_data {};
+    std::unordered_map<unicode::CodepointPair, float> kerning_table {};
 
     // Atlas
     std::vector<SDL_Rect> codepoint_rects {};

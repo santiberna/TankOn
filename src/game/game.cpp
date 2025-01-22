@@ -50,6 +50,8 @@ void Game::DrawPlayer(const Transform2D& camera, const PlayerData& player, uint3
 
 void Game::ProcessAllEvents()
 {
+    input_handler.UpdateInput();
+
     SDL_Event event {};
     while (SDL_PollEvent(&event))
     {
@@ -67,19 +69,19 @@ void Game::UpdatePlayer(PlayerData& player, const Transform2D& camera, DeltaMS d
 {
     glm::vec2 movement {};
 
-    if (input_handler.GetKey(SDLK_W))
+    if (input_handler.GetKey(SDLK_W) == InputState::ACTIVE)
     {
         movement += UP;
     }
-    if (input_handler.GetKey(SDLK_S))
+    if (input_handler.GetKey(SDLK_S) == InputState::ACTIVE)
     {
         movement -= UP;
     }
-    if (input_handler.GetKey(SDLK_D))
+    if (input_handler.GetKey(SDLK_D) == InputState::ACTIVE)
     {
         movement += RIGHT;
     }
-    if (input_handler.GetKey(SDLK_A))
+    if (input_handler.GetKey(SDLK_A) == InputState::ACTIVE)
     {
         movement -= RIGHT;
     }

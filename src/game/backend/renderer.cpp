@@ -50,11 +50,15 @@ void Renderer::RenderSprite(
 void Renderer::RenderSpriteRect(
     const Texture& sprite,
     const glm::vec2& screen_pos,
-    const glm::vec2& screen_size)
+    const glm::vec2& screen_size,
+    const glm::vec4& colour_mult)
 {
     SDL_FRect draw_dst {
         screen_pos.x - screen_size.x * 0.5f, screen_pos.y - screen_size.y * 0.5f, screen_size.x, screen_size.y
     };
+
+    SDL_SetTextureColorModFloat(sprite.handle.get(), colour_mult.x, colour_mult.y, colour_mult.z);
+    SDL_SetTextureAlphaModFloat(sprite.handle.get(), colour_mult.w);
 
     SDLAbortIfFailed(SDL_RenderTexture(
         renderer.get(),
@@ -112,6 +116,20 @@ void Renderer::RenderDebugRect(
 
 void Renderer::RenderButton(const Button& button)
 {
-    RenderSpriteRect(button.GetSprite(), button.position, button.size);
-    RenderText(button.GetTextBox(), button.position, { 1.0f, 1.0f, 1.0f, 1.0f });
+    glm::vec4 colour_mult = colour::WHITE;
+
+    switch (button.GetState())
+    {
+    case ButtonState::HOVERED:
+        colour_mult *= button.hover_mult;
+        break;
+    case ButtonState::PRESSED:
+        colour_mult *= button.press_mult;
+        break;
+    default:
+        break;
+    }
+
+    RenderSpriteRect(button.GetSprite(), button.position, button.size, colour_mult);
+    RenderText(button.GetTextBox(), button.position, button.text_colour * colour_mult);
 }

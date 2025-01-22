@@ -15,7 +15,7 @@ public:
     {
     }
 
-    void SetText(const Unicode::String& text);
+    void SetText(const unicode::String& text);
     glm::vec2 GetTotalSize() const { return total_size; }
     const Font& GetFont() const { return *font; }
 
