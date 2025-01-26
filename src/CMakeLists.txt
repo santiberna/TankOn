@@ -1,6 +1,7 @@
 # MAIN PROJECT
 
-add_library(${PROJECT_NAME})
+add_executable(${PROJECT_NAME} "main.cpp")
+target_output_directory(${PROJECT_NAME} ${CMAKE_BINARY_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC ThirdParty)
 
 target_compile_options(${PROJECT_NAME} 
@@ -15,6 +16,7 @@ target_compile_features(${PROJECT_NAME}
 
 file(GLOB_RECURSE source CONFIGURE_DEPENDS
     "game/*.cpp" "game/*.hpp"
+    "engine/*.cpp" "engine/*.hpp"
     "math/*.cpp" "math*.hpp"
     "network/*.cpp" "network/*.hpp"
     "resources/*.cpp" "resources/*.hpp"
@@ -23,7 +25,3 @@ file(GLOB_RECURSE source CONFIGURE_DEPENDS
 )
 
 target_sources(${PROJECT_NAME} PRIVATE ${source})
-
-add_executable(${PROJECT_NAME}Game "main.cpp")
-target_link_libraries(${PROJECT_NAME}Game PRIVATE ${PROJECT_NAME})
-target_output_directory(${PROJECT_NAME}Game ${CMAKE_BINARY_DIR})

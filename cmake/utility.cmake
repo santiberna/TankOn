@@ -6,10 +6,3 @@ function(target_output_directory target directory)
         ARCHIVE_OUTPUT_DIRECTORY ${directory}
     )
 endfunction()
-
-    
-function(target_copy_directory custom target source_directory destination_directory)
-add_custom_target(${custom} ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${source_directory} ${destination_directory}
-    DEPENDS ${target})
-endfunction()

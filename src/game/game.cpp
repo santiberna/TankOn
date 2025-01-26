@@ -69,19 +69,19 @@ void Game::UpdatePlayer(PlayerData& player, const Transform2D& camera, DeltaMS d
 {
     glm::vec2 movement {};
 
-    if (input_handler.GetKey(SDLK_W) == InputState::ACTIVE)
+    if (input_handler.GetKey(SDLK_W))
     {
         movement += UP;
     }
-    if (input_handler.GetKey(SDLK_S) == InputState::ACTIVE)
+    if (input_handler.GetKey(SDLK_S))
     {
         movement -= UP;
     }
-    if (input_handler.GetKey(SDLK_D) == InputState::ACTIVE)
+    if (input_handler.GetKey(SDLK_D))
     {
         movement += RIGHT;
     }
-    if (input_handler.GetKey(SDLK_A) == InputState::ACTIVE)
+    if (input_handler.GetKey(SDLK_A))
     {
         movement -= RIGHT;
     }

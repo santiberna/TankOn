@@ -1,7 +1,7 @@
 #pragma once
 #include <game/states/base_state.hpp>
-#include <game/backend/renderer.hpp>
-#include <game/backend/input.hpp>
+#include <engine/renderer.hpp>
+#include <engine/input.hpp>
 #include <resources/texture.hpp>
 #include <utility/timer.hpp>
 #include <game/gameplay/player.hpp>

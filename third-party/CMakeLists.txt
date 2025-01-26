@@ -13,6 +13,19 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(SDL_lib)
 target_output_directory(SDL3-shared "${CMAKE_BINARY_DIR}")
 
+# SDL_Mixer
+
+FetchContent_Declare(
+    SDL_mixer_lib
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer.git
+    GIT_TAG main 
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS TRUE
+)
+
+FetchContent_MakeAvailable(SDL_mixer_lib)
+target_output_directory(SDL3_mixer-shared "${CMAKE_BINARY_DIR}")
+
 # GLM
 
 FetchContent_Declare(
@@ -79,7 +92,7 @@ file(GLOB_RECURSE imgui_source CONFIGURE_DEPENDS
     "imgui/misc/*.cpp" "imgui/misc/.h"
     )
 
-add_library(ImGui)
+add_library(ImGui STATIC)
 target_include_directories(ImGui PUBLIC "imgui")
 target_link_libraries(ImGui PRIVATE SDL3-shared)
 
@@ -109,6 +122,7 @@ target_link_directories(ThirdParty
 
 target_link_libraries(ThirdParty 
     INTERFACE SDL3-shared
+    INTERFACE SDL3_mixer-shared 
     INTERFACE glm::glm
     INTERFACE cereal::cereal
     INTERFACE ImGui

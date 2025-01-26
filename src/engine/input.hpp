@@ -19,8 +19,21 @@ public:
     void UpdateInput();
     void ProcessEvent(const SDL_Event& event);
 
-    InputState GetKey(SDL_Keycode code) { return key_state[code]; }
-    InputState GetButton(SDL_Mousebutton code) { return button_state[code]; }
+    InputState GetKeyState(SDL_Keycode code) { return key_state[code]; }
+
+    bool GetKey(SDL_Keycode code)
+    {
+        auto state = GetKeyState(code);
+        return state == InputState::PRESSED || state == InputState::ACTIVE;
+    }
+
+    InputState GetButtonState(SDL_Mousebutton code) { return button_state[code]; }
+
+    bool GetButton(SDL_Mousebutton code)
+    {
+        auto state = GetButtonState(code);
+        return state == InputState::PRESSED || state == InputState::ACTIVE;
+    }
 
     bool ShouldClose() const { return exit_code; }
     glm::vec2 GetMousePos() const { return mouse_pos; }

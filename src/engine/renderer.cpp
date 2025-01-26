@@ -1,4 +1,4 @@
-#include <game/backend/renderer.hpp>
+#include <engine/renderer.hpp>
 
 std::optional<Renderer> Renderer::Create(uint32_t window_width, uint32_t window_height)
 {
