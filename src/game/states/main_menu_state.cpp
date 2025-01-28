@@ -1,11 +1,8 @@
-#include <game/states/main_menu_state.hpp>
-#include <game/states/lobby_state.hpp>
-#include <game/gameplay/game_server.hpp>
-#include <game/gameplay/game_client.hpp>
+#include <game/states/game_states.hpp>
 #include <utility/imgui_common.hpp>
 #include <game/game.hpp>
 
-void MainMenuState::ExecuteFrame(Game& game, DeltaMS deltatime)
+void MainMenuState::Update(Game& game, DeltaMS deltatime)
 {
     game.renderer.ClearScreen({ 0.0f, 0.0f, 0.0f });
 
@@ -35,12 +32,12 @@ void MainMenuState::ExecuteFrame(Game& game, DeltaMS deltatime)
 
 void MainMenuState::AttemptStartServer(Game& game)
 {
-    std::unique_ptr<GameServer> server = std::make_unique<GameServer>(cached_startup_info);
-    std::unique_ptr<GameClient> client = std::make_unique<GameClient>(cached_ip, SERVER_DEFAULT_PORT);
+    game.server = std::make_unique<GameServer>(cached_startup_info);
+    game.client = std::make_unique<GameClient>(cached_ip, SERVER_DEFAULT_PORT);
 
-    if (client->IsConnected())
+    if (game.client->IsConnected())
     {
-        game.SetGameState(new LobbyState(std::move(server), std::move(client)));
+        game.SetGameState(GameStates::LOBBY);
     }
     else
     {
@@ -50,11 +47,11 @@ void MainMenuState::AttemptStartServer(Game& game)
 
 void MainMenuState::AttemptJoinServer(Game& game)
 {
-    std::unique_ptr<GameClient> client = std::make_unique<GameClient>(cached_ip, SERVER_DEFAULT_PORT);
+    game.client = std::make_unique<GameClient>(cached_ip, SERVER_DEFAULT_PORT);
 
-    if (client->IsConnected())
+    if (game.client->IsConnected())
     {
-        game.SetGameState(new LobbyState(std::move(client)));
+        game.SetGameState(GameStates::LOBBY);
     }
     else
     {

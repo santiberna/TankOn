@@ -16,5 +16,10 @@ public:
         return out;
     }
 
+    void Start()
+    {
+        Mix_PlayMusic(handle.get(), -1);
+    }
+
     sdl::UniquePtr<Mix_Music, Mix_FreeMusic> handle {};
 };

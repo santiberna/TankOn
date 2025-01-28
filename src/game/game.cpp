@@ -16,6 +16,47 @@ Game::Game()
     player_sprites.emplace_back(LoadPlayerSkin(r, "assets/images/Tanks/TankBaseBlue.png", "assets/images/Tanks/TankWeaponBlue.png").value());
 }
 
+void Game::SetGameState(GameStates state)
+{
+    switch (state)
+    {
+    case GameStates::MAIN_MENU:
+        current_game_state = &main_menu;
+        break;
+    case GameStates::GAME:
+        current_game_state = &game_play_state;
+        break;
+    case GameStates::LOBBY:
+        current_game_state = &lobby_state;
+        break;
+    }
+
+    current_game_state->OnStateEnter(*this);
+}
+
+void Game::ExecuteFrame()
+{
+    input.UpdateInput();
+
+    SDL_Event event {};
+    while (SDL_PollEvent(&event))
+    {
+        imgui_shortcuts::ProcessSDLEvent(&event);
+        input.ProcessEvent(event);
+    }
+
+    if (input.ShouldClose())
+    {
+        should_quit = true;
+        return;
+    }
+
+    DeltaMS deltatime = delta_timer.GetElapsed();
+    delta_timer.Reset();
+
+    current_game_state->Update(*this, deltatime);
+}
+
 void Game::DrawPlayer(const Transform2D& camera, const PlayerData& player, uint32_t skin_id)
 {
     auto* r = renderer.GetRenderer();
@@ -48,40 +89,23 @@ void Game::DrawPlayer(const Transform2D& camera, const PlayerData& player, uint3
         SDL_FLIP_NONE));
 }
 
-void Game::ProcessAllEvents()
-{
-    input_handler.UpdateInput();
-
-    SDL_Event event {};
-    while (SDL_PollEvent(&event))
-    {
-        imgui_shortcuts::ProcessSDLEvent(&event);
-        input_handler.ProcessEvent(event);
-    }
-
-    if (input_handler.ShouldClose())
-    {
-        should_quit = true;
-    }
-}
-
 void Game::UpdatePlayer(PlayerData& player, const Transform2D& camera, DeltaMS deltatime)
 {
     glm::vec2 movement {};
 
-    if (input_handler.GetKey(SDLK_W))
+    if (input.GetKey(SDLK_W))
     {
         movement += UP;
     }
-    if (input_handler.GetKey(SDLK_S))
+    if (input.GetKey(SDLK_S))
     {
         movement -= UP;
     }
-    if (input_handler.GetKey(SDLK_D))
+    if (input.GetKey(SDLK_D))
     {
         movement += RIGHT;
     }
-    if (input_handler.GetKey(SDLK_A))
+    if (input.GetKey(SDLK_A))
     {
         movement -= RIGHT;
     }
@@ -94,7 +118,7 @@ void Game::UpdatePlayer(PlayerData& player, const Transform2D& camera, DeltaMS d
     }
 
     glm::vec2 player_screen = camera * player.position;
-    glm::vec2 tank_to_cursor = glm::normalize(input_handler.GetMousePos() - player_screen);
+    glm::vec2 tank_to_cursor = glm::normalize(input.GetMousePos() - player_screen);
 
     player.rotation = -glm::degrees(VectorAngle(UP, tank_to_cursor));
 }

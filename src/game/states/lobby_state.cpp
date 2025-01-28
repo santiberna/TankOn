@@ -1,35 +1,33 @@
-#include <game/states/lobby_state.hpp>
-#include <game/states/main_menu_state.hpp>
+#include <game/states/game_states.hpp>
 #include <utility/imgui_common.hpp>
-#include <game/states/gameplay_state.hpp>
 #include <game/game.hpp>
 
-void LobbyState::ExecuteFrame(Game& game, DeltaMS deltatime)
+void LobbyState::Update(Game& game, DeltaMS deltatime)
 {
     game.renderer.ClearScreen({ 0.0f, 0.0f, 0.0f });
 
-    if (!client->IsConnected())
+    if (!game.client->IsConnected())
     {
         ExitLobby(game);
         return;
     }
     else
     {
-        client->ProcessMessages();
+        game.client->ProcessMessages();
     }
 
-    if (client->InGame())
+    if (game.client->InGame())
     {
         StartGamemode(game);
         return;
     }
 
     ImGui::Begin("Lobby");
-    ImGui::Text("Waiting for Players... (%u/%u)", client->GetPlayerCount(), client->GetAllPlayers().target_players);
-    ImGui::Text("You are player %u.", client->GetPlayerId());
+    ImGui::Text("Waiting for Players... (%u/%u)", game.client->GetPlayerCount(), game.client->GetAllPlayers().target_players);
+    ImGui::Text("You are player %u.", game.client->GetPlayerId());
     ImGui::Separator();
 
-    if (is_host)
+    if (game.server)
     {
         ImGui::Text("You are currently the host");
 
@@ -40,7 +38,7 @@ void LobbyState::ExecuteFrame(Game& game, DeltaMS deltatime)
     }
     else
     {
-        ImGui::Text("You are currently connected to %s", client->GetHostname());
+        ImGui::Text("You are currently connected to %s", game.client->GetHostname());
 
         if (ImGui::Button("Exit Server"))
             ExitLobby(game);
@@ -51,13 +49,13 @@ void LobbyState::ExecuteFrame(Game& game, DeltaMS deltatime)
 
 void LobbyState::StartGamemode(Game& game)
 {
-    game.SetGameState(new GameplayState(std::move(server), std::move(client)));
+    game.SetGameState(GameStates::GAME);
 }
 
 void LobbyState::ExitLobby(Game& game)
 {
-    client.reset();
-    server.reset();
+    game.client.reset();
+    game.server.reset();
 
-    game.SetGameState(new MainMenuState());
+    game.SetGameState(GameStates::MAIN_MENU);
 }

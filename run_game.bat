@@ -1,1 +1,1 @@
-start build/Debug/NetworkingDemoGame
+start build/Debug/NetworkingDemo
