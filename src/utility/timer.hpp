@@ -2,6 +2,12 @@
 #include <chrono>
 
 using DeltaMS = std::chrono::duration<float, std::milli>;
+using UintMS = std::chrono::duration<uint32_t, std::milli>;
+
+inline UintMS GetEpochMS()
+{
+    return std::chrono::duration_cast<UintMS>(std::chrono::system_clock::now().time_since_epoch());
+}
 
 class Timer
 {

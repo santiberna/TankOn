@@ -63,7 +63,7 @@ public:
         notify_cv.notify_one();
     }
 
-    // Returns true if Queue has no items
+    // Returns true if queue has no items
     bool empty()
     {
         std::scoped_lock<std::mutex> lock { deque_mutex };

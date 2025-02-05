@@ -1,3 +1,4 @@
+#pragma once
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
 #include <backends/imgui_impl_sdl3.h>
