@@ -28,6 +28,8 @@ Application::Application()
 
         player_assets.emplace_back(base, weapon, shot, health);
     }
+
+    game_font = Font::SharedFromFile(renderer.GetRenderer(), GAME_FONT, FontLoadInfo {});
 }
 
 void Application::DoFrame()
@@ -77,6 +79,7 @@ void Application::UpdateGame(DeltaMS deltatime)
 
     auto& current_player = world_state.players.at(controlled);
 
+    if (world_state.lives.at(controlled) > 0)
     {
         glm::vec2 movement {};
 
@@ -106,41 +109,41 @@ void Application::UpdateGame(DeltaMS deltatime)
             current_player.position += dir * movement.y * TANK_SPEED * deltatime.count();
             current_player.position = glm::clamp(current_player.position, MAP_BOUNDS_MIN, MAP_BOUNDS_MAX);
         }
-    }
 
-    {
         auto mouse_pos = input.GetMousePos();
         auto towards_mouse = mouse_pos - current_player.position;
         auto angle = -VectorAngle(world::UP, glm::normalize(towards_mouse));
 
         current_player.weapon_rotation = angle;
-    }
+        client->UpdateControlledPlayer(current_player);
 
-    client->UpdateControlledPlayer(current_player);
+        if (shot_cooldown > 0.0f)
+        {
+            shot_cooldown -= deltatime.count();
+        }
 
-    if (shot_cooldown > 0.0f)
-    {
-        shot_cooldown -= deltatime.count();
-    }
+        if (input.GetButtonState(SDL_BUTTON_LEFT) == InputState::PRESSED && shot_cooldown <= 0.0f)
+        {
+            auto now = GetEpochMS();
+            auto direction = -AngleToVector(current_player.weapon_rotation + glm::pi<float>() * 0.5f);
 
-    if (input.GetButtonState(SDL_BUTTON_LEFT) == InputState::PRESSED && shot_cooldown <= 0.0f)
-    {
-        auto now = GetEpochMS();
-        auto direction = -AngleToVector(current_player.weapon_rotation + glm::pi<float>() * 0.5f);
+            BulletInfo info {};
 
-        BulletInfo info {};
+            info.direction = direction;
+            info.start_position = current_player.position + direction * BULLET_SPAWN_OFFSET;
+            info.start_time = now.count();
+            info.player = controlled;
 
-        info.direction = direction;
-        info.start_position = current_player.position + direction * BULLET_SPAWN_OFFSET;
-        info.start_time = now.count();
-        info.player = controlled;
-
-        client->ShootBullet(info);
-        shot_cooldown = BULLET_COOLDOWN_MS;
+            client->ShootBullet(info);
+            shot_cooldown = BULLET_COOLDOWN_MS;
+        }
     }
 
     for (uint32_t p = 0; p < world_state.players.size(); p++)
     {
+        if (world_state.lives.at(p) == 0)
+            continue;
+
         auto& player_data = world_state.players.at(p);
         auto& player_textures = player_assets.at(p);
 

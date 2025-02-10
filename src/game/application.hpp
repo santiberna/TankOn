@@ -13,6 +13,8 @@
 #include <resources/texture.hpp>
 #include <game/data/constants.hpp>
 
+#include <resources/font.hpp>
+
 struct PlayerResources
 {
     std::shared_ptr<Texture> base {};
@@ -42,4 +44,7 @@ public:
     bool in_game = false;
     std::vector<PlayerResources> player_assets {};
     float shot_cooldown = 0.0f;
+
+    // Font
+    std::shared_ptr<Font> game_font;
 };

@@ -83,6 +83,12 @@ void GameClient::ProcessMessages(Application& application)
             world_state.players.at(data.index) = data.info;
             break;
         }
+        case SERVER_DECLARE_WINNER:
+        {
+            std::scoped_lock<std::mutex> lock { client_mutex };
+            game_winner = FromMessage<uint32_t>(msg);
+            break;
+        }
         default:
             throw;
         }

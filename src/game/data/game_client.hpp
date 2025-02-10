@@ -75,6 +75,12 @@ public:
         }
     }
 
+    std::optional<uint32_t> GetGameWinner() const
+    {
+        std::scoped_lock<std::mutex> lock { client_mutex };
+        return game_winner;
+    }
+
 private:
     ContextThread context_thread;
     mutable std::mutex client_mutex {};
@@ -82,6 +88,8 @@ private:
     std::atomic<ConnectionResult> result { ConnectionResult::WAITING };
     std::unique_ptr<TCPResolver> resolver;
     std::unique_ptr<TCPConnection> connection;
+
+    std::optional<uint32_t> game_winner {};
 
     std::string player_name {};
     uint32_t player_id = -1;

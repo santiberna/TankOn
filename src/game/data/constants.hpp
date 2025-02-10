@@ -27,6 +27,8 @@ constexpr float BULLET_COOLDOWN_MS = 500.0f;
 constexpr float BULLET_SPEED = 0.5f;
 constexpr float BULLET_HIT_RADIUS = 50.0f;
 
+constexpr uint32_t END_SCREEN_MS = 5000;
+
 const std::array<std::string, MAX_PLAYERS> PLAYER_BASE_TEXTURES {
     "assets/images/Tanks/TankBaseRed.png",
     "assets/images/Tanks/TankBaseBlue.png",
@@ -54,6 +56,8 @@ const std::array<std::string, MAX_PLAYERS> HEART_TEXTURES {
     "assets/images/UI/HeartGreen.png",
     "assets/images/UI/HeartPurple.png",
 };
+
+const std::string GAME_FONT = { "assets/fonts/forward.ttf" };
 
 constexpr glm::vec2 PLAYER_SIZE = { 0.5f, 0.5f };
 constexpr float TANK_STEER = { 0.003f };

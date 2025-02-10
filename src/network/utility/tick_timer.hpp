@@ -23,6 +23,11 @@ public:
             { Handler(e); });
     }
 
+    void Cancel()
+    {
+        timer.cancel();
+    }
+
 private:
     void Handler(std::error_code e)
     {

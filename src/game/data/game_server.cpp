@@ -40,7 +40,12 @@ GameServer::GameServer(uint16_t port, uint32_t players)
         {
             HandleDisconnects();
             ProcessMessages();
-            CheckBulletCollisions();
+
+            if (started)
+            {
+                CheckBulletCollisions();
+                CheckWinner();
+            }
         });
 
     context_thread.Start();
@@ -199,4 +204,34 @@ void GameServer::CheckBulletCollisions()
     std::erase_if(world_info.bullets,
         [&to_remove](const BulletInfo& b)
         { return to_remove.contains(b.bullet_id); });
+}
+
+void GameServer::CheckWinner()
+{
+    uint32_t winner_id = 0;
+    uint32_t remaining = 0;
+
+    for (uint32_t i = 0; i < world_info.lives.size(); i++)
+    {
+        if (world_info.lives.at(i) > 0)
+        {
+            remaining++;
+            winner_id = i;
+        }
+    }
+
+    if (remaining == 1)
+    {
+        Broadcast(AsMessage(SERVER_DECLARE_WINNER, winner_id), nullptr);
+        timer->Cancel();
+
+        win_sequence_timer = std::make_unique<TickTimer>(
+            context_thread.Context(),
+            std::chrono::milliseconds(END_SCREEN_MS),
+            [this]()
+            {
+                context_thread.Context().stop();
+                lobby_connections.clear();
+            });
+    }
 }

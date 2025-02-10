@@ -116,6 +116,21 @@ void LobbyMenu::UpdateMenu(Application& application)
 
 void GameHUD::UpdateMenu(Application& application)
 {
+    auto winner = application.client->GetGameWinner();
+    auto controlled = application.client->GetPlayerIndex();
+
+    if (winner)
+    {
+        if (winner.value() == controlled)
+        {
+            Log("You Won!!!");
+        }
+        else
+        {
+            Log("You Lost!!!");
+        }
+    }
+
     constexpr std::array<glm::vec2, MAX_PLAYERS> HEALTH_DRAW_POS {
         glm::vec2(50.0f, 50.0f),
         glm::vec2(1550.0f, 850.0f),

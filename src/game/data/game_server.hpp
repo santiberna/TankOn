@@ -17,7 +17,11 @@ class GameServer
 {
 public:
     GameServer(uint16_t port, uint32_t max_players);
-    ~GameServer() { context_thread.Stop(); }
+
+    ~GameServer()
+    {
+        context_thread.Stop();
+    }
 
 private:
     void Broadcast(const Message& msg, const TCPConnection* ignore);
@@ -26,10 +30,12 @@ private:
     void ProcessMessages();
 
     void CheckBulletCollisions();
+    void CheckWinner();
 
     ContextThread context_thread;
     std::unique_ptr<TCPAcceptor> acceptor;
     std::unique_ptr<TickTimer> timer;
+    std::unique_ptr<TickTimer> win_sequence_timer;
 
     // Lobby
     uint32_t max_players;
