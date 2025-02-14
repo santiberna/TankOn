@@ -22,6 +22,7 @@ file(GLOB_RECURSE source CONFIGURE_DEPENDS
     "resources/*.cpp" "resources/*.hpp"
     "utility/*.cpp" "utility/*.hpp"
     "ui/*.cpp" "ui/*.hpp"
+    "thread/*.cpp" "thread/*.hpp"
 )
 
 target_sources(${PROJECT_NAME} PRIVATE ${source})
