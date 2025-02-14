@@ -1,1 +1,1 @@
-start build/Debug/NetworkingDemo
+start build/Debug/TankOn

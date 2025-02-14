@@ -1,7 +1,7 @@
 # PROJECT
 
 cmake_minimum_required(VERSION 3.15)
-project(NetworkingDemo)
+project(TankOn)
 
 # INCLUDES
 include(FetchContent)

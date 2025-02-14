@@ -121,14 +121,17 @@ void GameHUD::UpdateMenu(Application& application)
 
     if (winner)
     {
+        ImGui::Begin("Game Over");
         if (winner.value() == controlled)
         {
-            Log("You Won!!!");
+
+            ImGui::Text("You Won!");
         }
         else
         {
-            Log("You Lost!!!");
+            Log("You Lost!");
         }
+        ImGui::End();
     }
 
     constexpr std::array<glm::vec2, MAX_PLAYERS> HEALTH_DRAW_POS {
