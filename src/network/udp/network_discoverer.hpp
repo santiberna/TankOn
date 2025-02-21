@@ -14,12 +14,26 @@ public:
         asio::ip::udp::endpoint receiver_endpoint = *resolver.resolve(asio::ip::udp::v4(), "localhost", std::to_string(listener_port)).begin();
 
         asio::ip::udp::socket socket { context };
-
-        socket.async_receive_from(in_buf, sender_endpoint, [this](std::error_code e, size_t len)
-            { std::cout.write(in_buf.data(), len); });
+        socket.open(asio::ip::udp::v4());
 
         out_buf = "Hello World!";
-        socket.send_to(out_buf, receiver_endpoint);
+        boost::system::error_code e;
+        socket.send_to(asio::buffer(out_buf), receiver_endpoint, {}, e);
+
+        if (e)
+        {
+            std::cout << e.message() << std::endl;
+        }
+
+        in_buf.resize(128);
+        auto len = socket.receive_from(asio::buffer(in_buf), sender_endpoint, {}, e);
+
+        if (e)
+        {
+            std::cout << e.message() << std::endl;
+        }
+
+        std::cout.write(in_buf.data(), len);
     }
 
 private:
