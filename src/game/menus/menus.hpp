@@ -1,5 +1,5 @@
 #pragma once
-#include <ui/menu.hpp>
+#include <game/menu.hpp>
 #include <string>
 
 class MainMenu : public MenuInterface

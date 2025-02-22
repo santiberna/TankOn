@@ -32,11 +32,8 @@ Application::Application()
     game_font = Font::SharedFromFile(renderer.GetRenderer(), GAME_FONT, FontLoadInfo {});
 }
 
-void Application::DoFrame()
+void Application::HandleInput()
 {
-    DeltaMS deltatime = delta_timer.GetElapsed();
-    delta_timer.Reset();
-
     input.UpdateInput();
 
     SDL_Event event {};
@@ -45,6 +42,12 @@ void Application::DoFrame()
         imgui_shortcuts::ProcessSDLEvent(&event);
         input.ProcessEvent(event);
     }
+}
+
+void Application::DoFrame()
+{
+    DeltaMS deltatime = delta_timer.GetElapsed();
+    delta_timer.Reset();
 
     renderer.ClearScreen(colour::BLACK);
 

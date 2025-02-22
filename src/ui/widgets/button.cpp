@@ -1,4 +1,4 @@
-#include <ui/button.hpp>
+#include <ui/widgets/button.hpp>
 
 void Button::UpdateButton(const glm::vec2& mouse_pos, InputState mouse_input)
 {

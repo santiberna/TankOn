@@ -1,5 +1,5 @@
 #pragma once
-#include <ui/menu.hpp>
+#include <game/menu.hpp>
 #include <engine/input.hpp>
 #include <engine/renderer.hpp>
 #include <utility/timer.hpp>
@@ -33,6 +33,7 @@ public:
 
     Application();
 
+    void HandleInput();
     void DoFrame();
     void UpdateGame(DeltaMS deltatime);
 

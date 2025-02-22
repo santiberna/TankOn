@@ -1,4 +1,4 @@
-#include <ui/text_box.hpp>
+#include <ui/widgets/text_box.hpp>
 
 void TextBox::SetText(const unicode::String& text)
 {
