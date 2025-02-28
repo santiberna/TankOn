@@ -1,29 +1,18 @@
 #pragma once
 #include <resources/font.hpp>
+#include <ui/ui_element.hpp>
 
-struct CodepointDrawData
-{
-    glm::vec2 offset {};
-    std::optional<uint32_t> atlas_index {};
-};
-
-class TextBox
+class TextBox : public UIElement
 {
 public:
-    TextBox(std::shared_ptr<Font> font)
+    TextBox(std::shared_ptr<Font> font, const unicode::String& text)
         : font(font)
+        , text(text)
     {
     }
 
-    void SetText(const unicode::String& text);
-    glm::vec2 GetTotalSize() const { return total_size; }
-    const Font& GetFont() const { return *font; }
+    virtual void Draw(Renderer& renderer, const DrawInfo& draw_params) const;
 
-    auto begin() const { return codepoint_sequence.begin(); }
-    auto end() const { return codepoint_sequence.end(); }
-
-private:
     std::shared_ptr<Font> font;
-    std::vector<CodepointDrawData> codepoint_sequence {};
-    glm::vec2 total_size {};
+    unicode::String text {};
 };

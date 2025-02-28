@@ -21,7 +21,7 @@ struct CodepointInfo
 
 struct FontLoadInfo
 {
-    std::vector<unicode::CodepointPair> codepoint_ranges { unicode::ASCII_CODESET };
+    std::vector<unicode::CodepointPair> codepoint_ranges { unicode::LATIN_CODESET };
     glm::uvec2 initial_atlas_packing_area { 128, 128 };
     float resolutionY = 32.0f;
     uint32_t atlas_margin = 1;
@@ -31,6 +31,7 @@ class Font
 {
 public:
     static std::optional<Font> FromFile(SDL_Renderer* renderer, const std::string& font_file, const FontLoadInfo& load_params);
+
     static std::shared_ptr<Font> SharedFromFile(SDL_Renderer* renderer, const std::string& font_file, const FontLoadInfo& load_params)
     {
         if (auto font = FromFile(renderer, font_file, load_params))
@@ -39,7 +40,6 @@ public:
     }
 
     const Texture& GetAtlasTexture() const { return font_atlas; }
-
     FontMetrics GetFontMetrics() const { return font_metrics; }
 
     SDL_Rect GetAtlasRect(uint32_t index) const

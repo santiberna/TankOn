@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 #include <string_view>
 
@@ -13,22 +15,13 @@ using StringView = std::basic_string_view<Codepoint>;
 constexpr Codepoint SPACE_CODEPOINT = 0x20;
 constexpr Codepoint LINEBREAK_CODEPOINT = 0x0A;
 constexpr Codepoint MISSING_CODEPOINT = 0x3F;
+constexpr Codepoint BACKSPACE_CODEPOINT = 0x2408;
 
-constexpr std::pair<Codepoint, Codepoint> ASCII_CODESET = { 1, 128 };
+constexpr std::pair<Codepoint, Codepoint> ASCII_CODESET = { 1, 0x7F };
+constexpr std::pair<Codepoint, Codepoint> LATIN_CODESET = { 1, 0xFF };
 
-inline String FromASCII(const std::string& string)
-{
-    String out {};
-    out.reserve(string.size());
-
-    for (auto c : string)
-    {
-        out.push_back(static_cast<Codepoint>(c));
-    }
-
-    return out;
-}
-
+String FromASCII(const std::string& ascii);
+String FromUTF8(const std::string& utf8);
 }
 
 // Relevant specializations

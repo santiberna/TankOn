@@ -3,9 +3,42 @@
 #include <engine/audio.hpp>
 #include <game/application.hpp>
 
+// Test Stuff
+
+#include <input/event_system.hpp>
 #include <ui/widgets/debug_rect.hpp>
 #include <ui/widgets/sprite.hpp>
+#include <ui/widgets/text_box.hpp>
 #include <ui/canvas.hpp>
+
+Canvas SetupCanvas(Renderer& renderer, InputEventSystem& events)
+{
+    Canvas canvas {};
+
+    // Font
+    std::shared_ptr<Font> font = Font::SharedFromFile(renderer.GetRenderer(), "assets/fonts/arial.ttf", {});
+
+    auto element = std::make_unique<UIDebugRect>();
+    element->active = true;
+    element->colour = colour::WHITE;
+    element->transform.size = { 0.5f, 0.5f };
+
+    auto child_element = std::make_unique<TextBox>(font, unicode::FromASCII("Hello World!"));
+    child_element->transform.size = { 1.0f, 1.0f };
+
+    events.OnTextInput().connect([text = child_element.get()](auto& c)
+        { 
+            if (c.front() == unicode::BACKSPACE_CODEPOINT && text->text.size()) {
+                text->text.pop_back();
+            } else if (c.front() != unicode::BACKSPACE_CODEPOINT){
+            text->text.append(c.c_str());
+            } });
+
+    element->children.emplace_back(std::move(child_element));
+    canvas.elements.emplace_back(std::move(element));
+
+    return canvas;
+}
 
 int main(int, char*[])
 {
@@ -17,38 +50,30 @@ int main(int, char*[])
         Application game {};
         imgui_shortcuts::InitSDL3(game.renderer.GetWindow(), game.renderer.GetRenderer());
 
+        SDL_StartTextInput(game.renderer.GetWindow());
+
+        InputEventSystem events {};
+
+        bool exit_code = false;
+        signals::scoped_connection ref = events.OnCloseRequested().connect([&exit_code]()
+            { exit_code = true; });
+
         // Music music = Music::Create("assets/music/Retro_Platforming-David_Fesliyan.mp3").value();
         // music.Start();
 
-        Canvas canvas {};
+        auto canvas = SetupCanvas(game.renderer, events);
 
-        auto element = std::make_unique<UIDebugRect>();
-        element->active = true;
-        element->colour = colour::WHITE;
-        element->transform.position = { 0.5f, 0.5f };
-        element->transform.size = { 0.0f, 0.3f };
-        element->transform.pivot = { 0.0f, 0.0f };
-
-        auto* e = element.get();
-
-        auto child_element = std::make_unique<UISprite>();
-        child_element->transform.size = { 0.5f, 0.5f };
-        child_element->sprite = Texture::SharedFromImage(game.renderer.GetRenderer(), Image::FromFile("assets/images/UI/HeartBlue.png").value());
-        element->children.emplace_back(std::move(child_element));
-
-        canvas.elements.emplace_back(std::move(element));
-
-        while (!game.input.ShouldClose())
+        while (!exit_code)
         {
             imgui_shortcuts::StartFrame();
-
             game.renderer.ClearScreen(colour::BLACK);
-            game.HandleInput();
 
-            static float dt = 0.0f;
-            dt += 0.01f;
-            e->transform.size.x = (std::sin(dt) * 0.5f + 0.5f) * 0.5f;
-            e->colour.a = (std::sin(dt) * 0.5f + 0.5f);
+            SDL_Event event {};
+            while (SDL_PollEvent(&event))
+            {
+                imgui_shortcuts::ProcessSDLEvent(&event);
+                events.ProcessEvent(event);
+            }
 
             canvas.RenderCanvas(game.renderer);
 
