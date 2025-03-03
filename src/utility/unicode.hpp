@@ -17,8 +17,8 @@ constexpr Codepoint LINEBREAK_CODEPOINT = 0x0A;
 constexpr Codepoint MISSING_CODEPOINT = 0x3F;
 constexpr Codepoint BACKSPACE_CODEPOINT = 0x2408;
 
-constexpr std::pair<Codepoint, Codepoint> ASCII_CODESET = { 1, 0x7F };
-constexpr std::pair<Codepoint, Codepoint> LATIN_CODESET = { 1, 0xFF };
+constexpr std::pair<Codepoint, Codepoint> ASCII_CODESET = { 0x0, 0x7F };
+constexpr std::pair<Codepoint, Codepoint> LATIN_SUPPLEMENT_CODESET = { 0x80, 0xFF };
 
 String FromASCII(const std::string& ascii);
 String FromUTF8(const std::string& utf8);

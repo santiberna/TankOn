@@ -11,8 +11,6 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(SDL_lib)
-target_output_directory(SDL3-shared "${CMAKE_BINARY_DIR}")
-
 # SDL_Mixer
 
 FetchContent_Declare(
@@ -24,7 +22,6 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(SDL_mixer_lib)
-target_output_directory(SDL3_mixer-shared "${CMAKE_BINARY_DIR}")
 
 # GLM
 
@@ -68,6 +65,22 @@ message(STATUS "Boost version: ${Boost_VERSION}")
 message(STATUS "Boost include dir: ${Boost_INCLUDE_DIRS}")
 message(STATUS "Boost library dir: ${Boost_LIBRARY_DIRS}")
 
+# Tracy Profiler
+
+FetchContent_Declare(
+    Tracy
+    GIT_REPOSITORY https://github.com/wolfpld/tracy.git
+    GIT_TAG v0.11.1
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS TRUE
+)
+
+if (PROFILE)
+    set(TRACY_ENABLE ON)
+endif()
+
+FetchContent_MakeAvailable(Tracy)
+
 # Cereal
 
 FetchContent_Declare(
@@ -94,7 +107,7 @@ file(GLOB_RECURSE imgui_source CONFIGURE_DEPENDS
 
 add_library(ImGui STATIC)
 target_include_directories(ImGui PUBLIC "imgui")
-target_link_libraries(ImGui PRIVATE SDL3-shared)
+target_link_libraries(ImGui PRIVATE SDL3-static)
 
 target_sources(ImGui PRIVATE 
     "imgui/imgui.cpp" 
@@ -121,11 +134,12 @@ target_link_directories(ThirdParty
 )
 
 target_link_libraries(ThirdParty 
-    INTERFACE SDL3-shared
-    INTERFACE SDL3_mixer-shared 
+    INTERFACE SDL3-static
+    INTERFACE SDL3_mixer-static 
     INTERFACE glm::glm
     INTERFACE cereal::cereal
     INTERFACE ImGui
     INTERFACE STB
+    INTERFACE Tracy::TracyClient
     ${Boost_LIBRARIES}
     )

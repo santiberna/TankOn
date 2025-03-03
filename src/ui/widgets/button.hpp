@@ -1,7 +1,6 @@
 #pragma once
 #include <ui/widgets/text_box.hpp>
 #include <utility/colours.hpp>
-#include <engine/input.hpp>
 #include <functional>
 
 enum class ButtonState

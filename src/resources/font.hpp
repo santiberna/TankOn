@@ -21,7 +21,7 @@ struct CodepointInfo
 
 struct FontLoadInfo
 {
-    std::vector<unicode::CodepointPair> codepoint_ranges { unicode::LATIN_CODESET };
+    std::vector<unicode::CodepointPair> codepoint_ranges { unicode::ASCII_CODESET };
     glm::uvec2 initial_atlas_packing_area { 128, 128 };
     float resolutionY = 32.0f;
     uint32_t atlas_margin = 1;
