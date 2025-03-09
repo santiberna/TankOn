@@ -3,7 +3,10 @@
 #include <engine/audio.hpp>
 #include <game/application.hpp>
 
-#include <tracy/Tracy.hpp>
+// constexpr std::chrono::milliseconds DEFAULT_UDP_TIMEOUT = std::chrono::milliseconds(128);
+// constexpr auto DISCOVER_CHANNEL = "224.0.0.2";
+// constexpr uint16_t DISCOVER_PORT = 32101;
+// constexpr uint16_t LISTENER_PORT = 32102;
 
 int main(int, char*[])
 {
@@ -15,22 +18,18 @@ int main(int, char*[])
         Application game {};
         imgui_shortcuts::InitSDL3(game.renderer.GetWindow(), game.renderer.GetRenderer());
 
-        SDL_StartTextInput(game.renderer.GetWindow());
-
         // Music music = Music::Create("assets/music/Retro_Platforming-David_Fesliyan.mp3").value();
         // music.Start();
 
-        FrameMark;
         while (!game.close_game)
         {
             imgui_shortcuts::StartFrame();
-            game.HandleInput();
 
+            game.HandleInput();
             game.DoFrame();
 
             imgui_shortcuts::EndFrame(game.renderer.GetRenderer());
             SDL_RenderPresent(game.renderer.GetRenderer());
-            FrameMark;
         }
 
         imgui_shortcuts::ShutdownSDL3();
@@ -39,7 +38,6 @@ int main(int, char*[])
     Mix_CloseAudio();
     Mix_Quit();
     SDL_Quit();
-    FrameMark;
 
     return 0;
 }

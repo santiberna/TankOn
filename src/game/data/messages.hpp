@@ -20,7 +20,24 @@ enum MessageType
     SERVER_DECLARE_WINNER,
 
     BOTH_UPDATE_PLAYER,
+};
 
+struct LobbyDiscoverInfo
+{
+    std::string hostname {};
+    std::string ip {};
+
+    uint32_t current_players {};
+    uint32_t max_players {};
+
+    template <typename A>
+    void serialize(A& ar)
+    {
+        ar(hostname);
+        ar(ip);
+        ar(current_players);
+        ar(max_players);
+    }
 };
 
 struct UserData
@@ -125,7 +142,7 @@ struct PlayerUpdate
 };
 
 template <typename T>
-Message AsMessage(MessageType type, const T& data)
+std::string SerializeStruct(const T& data)
 {
     std::stringstream ss {};
 
@@ -134,13 +151,13 @@ Message AsMessage(MessageType type, const T& data)
         ar(data);
     }
 
-    return Message(static_cast<uint32_t>(type), ss.str());
+    return ss.str();
 }
 
 template <typename T>
-T FromMessage(const Message& data)
+T DeserializeStruct(const std::string& data)
 {
-    std::stringstream ss { data.body.data };
+    std::stringstream ss { data };
     T out {};
 
     {
@@ -149,4 +166,16 @@ T FromMessage(const Message& data)
     }
 
     return out;
+}
+
+template <typename T>
+Message AsMessage(MessageType type, const T& data)
+{
+    return Message(static_cast<uint32_t>(type), SerializeStruct(data));
+}
+
+template <typename T>
+T FromMessage(const Message& data)
+{
+    return DeserializeStruct<T>(data.body.data);
 }

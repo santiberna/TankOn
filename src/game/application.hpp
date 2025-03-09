@@ -11,6 +11,8 @@
 #include <resources/font.hpp>
 #include <ui/canvas.hpp>
 #include <input/event_system.hpp>
+#include <game/data/lobby_discoverer.hpp>
+#include <game/data/lobby_broadcaster.hpp>
 
 struct PlayerResources
 {
@@ -39,6 +41,9 @@ public:
     // Networking
     std::unique_ptr<GameClient> client {};
     std::unique_ptr<GameServer> server {};
+
+    std::unique_ptr<LobbyDiscoverer> discoverer {};
+    std::unique_ptr<LobbyBroadcaster> broadcaster {};
 
     // Game
     bool close_game = false;
