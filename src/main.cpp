@@ -3,10 +3,7 @@
 #include <engine/audio.hpp>
 #include <game/application.hpp>
 
-// constexpr std::chrono::milliseconds DEFAULT_UDP_TIMEOUT = std::chrono::milliseconds(128);
-// constexpr auto DISCOVER_CHANNEL = "224.0.0.2";
-// constexpr uint16_t DISCOVER_PORT = 32101;
-// constexpr uint16_t LISTENER_PORT = 32102;
+#include <game/data/lobby_discovery.hpp>
 
 int main(int, char*[])
 {

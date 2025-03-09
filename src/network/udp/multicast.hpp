@@ -25,10 +25,17 @@ public:
             socket.close();
     }
 
+    asio::ip::address GetBroadcastIP() const
+    {
+        return socket.local_endpoint().address();
+    }
+
     void Send(const std::string& data)
     {
         assert(data.size() < MAX_MESSAGE_SIZE);
-        socket.send(asio::buffer(data));
+
+        boost::system::error_code unused {};
+        socket.send(asio::buffer(data), 0, unused);
     }
 
 private:
@@ -52,7 +59,7 @@ public:
 
     void QueueStart()
     {
-        socket.async_receive(asio::buffer(message_buf), [this](std::error_code e, size_t size)
+        socket.async_receive(asio::buffer(message_buf.data(), message_buf.size()), [this](std::error_code e, size_t size)
             { HandleRead(e, size); });
     }
 
@@ -63,7 +70,6 @@ private:
     {
         if (e)
         {
-            Log("{}", e.message());
             return;
         }
 

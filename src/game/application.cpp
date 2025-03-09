@@ -35,10 +35,11 @@ Application::Application()
     }
 
     FontLoadInfo info {};
+    info.codepoint_ranges.emplace_back(unicode::ASCII_CODESET);
     info.codepoint_ranges.emplace_back(unicode::LATIN_SUPPLEMENT_CODESET);
 
     game_font = Font::SharedFromFile(renderer.GetRenderer(), GAME_FONT, FontLoadInfo {});
-    ui_canvas = SetupCanvas();
+    // ui_canvas = SetupCanvas();
 
     input.OnCloseRequested().connect([this]()
         { close_game = true; });
@@ -92,10 +93,10 @@ void Application::DoFrame()
     if (in_game)
         UpdateGame(deltatime);
 
-    // if (!main_menu_stack.Empty())
-    //     main_menu_stack.UpdateTop(*this);
+    if (!main_menu_stack.Empty())
+        main_menu_stack.UpdateTop(*this);
 
-    ui_canvas.RenderCanvas(renderer);
+    // ui_canvas.RenderCanvas(renderer);
 }
 
 void Application::UpdateGame(DeltaMS deltatime)
@@ -104,9 +105,11 @@ void Application::UpdateGame(DeltaMS deltatime)
     {
         client.reset();
         server.reset();
-
-        main_menu_stack.Push(std::make_unique<MainMenu>());
         in_game = false;
+
+        main_menu_stack.Pop();
+        main_menu_stack.Push(std::make_unique<MainMenu>());
+
         return;
     }
     else
