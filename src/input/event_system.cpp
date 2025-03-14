@@ -8,6 +8,8 @@ void InputEventSystem::ProcessEvent(const SDL_Event& ev)
     case SDL_EVENT_KEY_DOWN:
     {
         key_state[ev.key.key] = InputState::PRESSED;
+
+        bool text_enabled = SDL_TextInputActive(window);
         if (text_enabled && ev.key.key == SDLK_BACKSPACE)
         {
             on_text_input({ unicode::BACKSPACE_CODEPOINT });
@@ -31,9 +33,11 @@ void InputEventSystem::ProcessEvent(const SDL_Event& ev)
         break;
     case SDL_EVENT_MOUSE_BUTTON_DOWN:
         button_state[ev.button.button] = InputState::PRESSED;
+        on_button_click[ev.button.button](true);
         break;
     case SDL_EVENT_MOUSE_BUTTON_UP:
         button_state[ev.button.button] = InputState::RELEASED;
+        on_button_click[ev.button.button](false);
         break;
     case SDL_EVENT_TEXT_INPUT:
     {

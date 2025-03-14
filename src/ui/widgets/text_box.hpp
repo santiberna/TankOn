@@ -13,6 +13,7 @@ public:
 
     virtual void Draw(Renderer& renderer, const DrawInfo& draw_params) const;
 
+protected:
     std::shared_ptr<Font> font;
     unicode::String text {};
 };

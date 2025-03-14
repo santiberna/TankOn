@@ -29,6 +29,5 @@ public:
     bool active = true;
     RectTransform transform {};
     glm::vec4 colour = colour::WHITE;
-
     std::vector<std::unique_ptr<UIElement>> children {};
 };

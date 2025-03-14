@@ -4,6 +4,7 @@
 #include <SDL3/SDL_events.h>
 #include <unordered_map>
 #include <glm/vec2.hpp>
+#include <utility/log.hpp>
 
 using SDL_Mousebutton = Uint8;
 
@@ -18,10 +19,32 @@ enum class InputState
 class InputEventSystem
 {
 public:
+    InputEventSystem(SDL_Window* bound_window)
+        : window(bound_window)
+    {
+    }
+
+    void SetTextInput(bool val)
+    {
+        bool prev = SDL_TextInputActive(window);
+
+        if (val && !prev)
+        {
+            Log("Started Text Input");
+            SDL_StartTextInput(window);
+        }
+        else if (!val && prev)
+        {
+            Log("Stopped Text Input");
+            SDL_StopTextInput(window);
+        }
+    }
+
     void ProcessEvent(const SDL_Event& event);
 
     auto& OnCloseRequested() { return on_close; }
     auto& OnTextInput() { return on_text_input; }
+    auto& OnButtonClick(SDL_Mousebutton button) { return on_button_click[button]; }
 
     void UpdateInput();
 
@@ -45,13 +68,14 @@ public:
     glm::vec2 GetMousePos() const { return mouse_pos; }
 
 private:
+    SDL_Window* window {};
     std::unordered_map<SDL_Keycode, InputState> key_state {};
     std::unordered_map<SDL_Mousebutton, InputState> button_state {};
 
     glm::vec2 mouse_pos { -1.0f, -1.0f };
     bool exit_code = false;
 
-    bool text_enabled = true;
     signals::signal<void()> on_close {};
     signals::signal<void(const unicode::String&)> on_text_input {};
+    std::unordered_map<SDL_Mousebutton, signals::signal<void(bool)>> on_button_click {};
 };

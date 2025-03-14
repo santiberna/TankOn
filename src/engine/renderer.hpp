@@ -35,7 +35,11 @@ public:
         const glm::vec2& size,
         const glm::vec4& colour);
 
+    void SetDebugRendering(bool val) { debug_enabled = val; }
+    bool IsDebugRendering() const { return debug_enabled; }
+
 private:
+    bool debug_enabled = false;
     uint32_t window_width {};
     uint32_t window_height {};
 

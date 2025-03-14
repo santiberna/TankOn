@@ -26,7 +26,7 @@ public:
     Canvas ui_canvas {};
     MenuStack main_menu_stack {};
     Renderer renderer {};
-    InputEventSystem input {};
+    std::unique_ptr<InputEventSystem> input {};
     Timer delta_timer {};
 
     Application();
