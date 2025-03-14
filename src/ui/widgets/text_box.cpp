@@ -72,12 +72,12 @@ void TextBox::Draw(Renderer& renderer, const DrawInfo& draw_params) const
 {
     if (renderer.IsDebugRendering())
     {
-        renderer.RenderDebugRect(draw_params.rect_center, draw_params.rect_size, draw_params.node_colour);
+        renderer.RenderRect(draw_params.rect_center, draw_params.rect_size, draw_params.node_colour);
     }
 
-    auto* sprite_atlas = font->GetAtlasTexture().handle.get();
-    SDL_SetTextureColorModFloat(sprite_atlas, colour.x, colour.y, colour.z);
-    SDL_SetTextureAlphaModFloat(sprite_atlas, colour.w);
+    auto& sprite_atlas = font->GetAtlasTexture();
+    SDL_SetTextureColorModFloat(sprite_atlas.handle.get(), colour.x, colour.y, colour.z);
+    SDL_SetTextureAlphaModFloat(sprite_atlas.handle.get(), colour.w);
 
     auto layout = LayoutText(*font, text, draw_params.rect_center, draw_params.rect_size);
 
@@ -94,7 +94,6 @@ void TextBox::Draw(Renderer& renderer, const DrawInfo& draw_params) const
         dst_rect.h = src_rect.h;
         dst_rect.w = src_rect.w;
 
-        SDLAbortIfFailed(
-            SDL_RenderTexture(renderer.GetRenderer(), sprite_atlas, &src_rect, &dst_rect));
+        renderer.RenderTextureRect(sprite_atlas, src_rect, dst_rect);
     }
 }

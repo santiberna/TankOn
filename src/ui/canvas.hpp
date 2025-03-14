@@ -9,11 +9,11 @@ struct Canvas
 
     void RenderCanvas(Renderer& renderer)
     {
-        glm::vec2 screen_size = { renderer.GetScreenWidth(), renderer.GetScreenHeight() };
+        glm::vec2 frame_size = glm::vec2(WORLD_MAGNIFICATION * renderer.GetFrameAspectRatio(), WORLD_MAGNIFICATION);
 
         DrawInfo initial {
-            screen_size * 0.5f,
-            screen_size,
+            frame_size * 0.5f,
+            frame_size,
             colour::WHITE
         };
 

@@ -46,8 +46,9 @@ Application::Application()
     input->OnCloseRequested().connect([this]()
         { close_game = true; });
 
-    input->OnButtonClick(SDL_BUTTON_LEFT).connect([this](bool press)
+    input->OnButtonClick(SDL_BUTTON_LEFT).connect([this](auto, bool press)
         { if (press) { shoot_requested = true; } });
+
     input->OnMouseMove().connect([this](auto& pos)
         { mouse_pos = pos; });
 
@@ -84,7 +85,7 @@ void Application::HandleInput()
     while (SDL_PollEvent(&event))
     {
         imgui_shortcuts::ProcessSDLEvent(&event);
-        input->ProcessEvent(event);
+        input->ProcessEvent(renderer, event);
     }
 }
 
@@ -101,7 +102,7 @@ void Application::DoFrame()
     if (!main_menu_stack.Empty())
         main_menu_stack.UpdateTop(*this);
 
-    // ui_canvas.RenderCanvas(renderer);
+    ui_canvas.RenderCanvas(renderer);
 }
 
 void Application::UpdateGame(DeltaMS deltatime)
@@ -132,7 +133,6 @@ void Application::UpdateGame(DeltaMS deltatime)
 
     if (world_state.lives.at(controlled) > 0)
     {
-
         if (glm::epsilonNotEqual(glm::length(player_movement), 0.0f, glm::epsilon<float>()))
         {
             float rotation_add = player_movement.x * TANK_STEER * deltatime.count();

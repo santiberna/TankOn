@@ -10,19 +10,19 @@ public:
     TextInput(InputEventSystem& input, std::shared_ptr<Font> font, const unicode::String& text)
         : TextBox(font, text)
     {
-        auto button_handler = [this, &input](bool pressed)
+        auto button_handler = [this, &input](const glm::vec2& mouse_pos, bool pressed)
         {
             if (!pressed)
                 return;
 
-            // if (CheckAABB(input.GetMousePos(), cached_draw_info.rect_size, cached_draw_info.rect_center))
-            // {
-            //     input.SetTextInput(true);
-            // }
-            // else
-            // {
-            //     input.SetTextInput(false);
-            // }
+            if (CheckAABB(mouse_pos, cached_draw_info.rect_size, cached_draw_info.rect_center))
+            {
+                input.SetTextInput(true);
+            }
+            else
+            {
+                input.SetTextInput(false);
+            }
         };
 
         auto text_handler = [this](auto& c)
