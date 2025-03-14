@@ -4,6 +4,11 @@
 #include <glm/gtc/epsilon.hpp>
 #include <glm/gtc/constants.hpp>
 
+#include <ui/widgets/debug_rect.hpp>
+#include <ui/widgets/sprite.hpp>
+#include <ui/widgets/text_box.hpp>
+#include <ui/canvas.hpp>
+
 Application::Application()
 {
     renderer = Renderer::Create((uint32_t)WINDOW_SIZE.x, (uint32_t)WINDOW_SIZE.y).value();
@@ -29,14 +34,45 @@ Application::Application()
         player_assets.emplace_back(base, weapon, shot, health);
     }
 
+    FontLoadInfo info {};
+    info.codepoint_ranges.emplace_back(unicode::ASCII_CODESET);
+    info.codepoint_ranges.emplace_back(unicode::LATIN_SUPPLEMENT_CODESET);
+
     game_font = Font::SharedFromFile(renderer.GetRenderer(), GAME_FONT, FontLoadInfo {});
+    // ui_canvas = SetupCanvas();
+
+    input.OnCloseRequested().connect([this]()
+        { close_game = true; });
 }
 
-void Application::DoFrame()
+Canvas Application::SetupCanvas()
 {
-    DeltaMS deltatime = delta_timer.GetElapsed();
-    delta_timer.Reset();
+    Canvas canvas {};
 
+    auto element = std::make_unique<UIDebugRect>();
+    element->active = true;
+    element->colour = colour::WHITE;
+    element->transform.size = { 0.5f, 0.5f };
+
+    auto child_element = std::make_unique<TextBox>(game_font, unicode::FromASCII("Hello World!"));
+    child_element->transform.size = { 1.0f, 1.0f };
+
+    input.OnTextInput().connect([text = child_element.get()](auto& c)
+        { 
+        if (c.front() == unicode::BACKSPACE_CODEPOINT && text->text.size()) {
+            text->text.pop_back();
+        } else if (c.front() != unicode::BACKSPACE_CODEPOINT){
+        text->text.append(c.c_str());
+        } });
+
+    element->children.emplace_back(std::move(child_element));
+    canvas.elements.emplace_back(std::move(element));
+
+    return canvas;
+}
+
+void Application::HandleInput()
+{
     input.UpdateInput();
 
     SDL_Event event {};
@@ -45,6 +81,12 @@ void Application::DoFrame()
         imgui_shortcuts::ProcessSDLEvent(&event);
         input.ProcessEvent(event);
     }
+}
+
+void Application::DoFrame()
+{
+    DeltaMS deltatime = delta_timer.GetElapsed();
+    delta_timer.Reset();
 
     renderer.ClearScreen(colour::BLACK);
 
@@ -53,6 +95,8 @@ void Application::DoFrame()
 
     if (!main_menu_stack.Empty())
         main_menu_stack.UpdateTop(*this);
+
+    // ui_canvas.RenderCanvas(renderer);
 }
 
 void Application::UpdateGame(DeltaMS deltatime)
@@ -61,9 +105,11 @@ void Application::UpdateGame(DeltaMS deltatime)
     {
         client.reset();
         server.reset();
-
-        main_menu_stack.Push(std::make_unique<MainMenu>());
         in_game = false;
+
+        main_menu_stack.Pop();
+        main_menu_stack.Push(std::make_unique<MainMenu>());
+
         return;
     }
     else

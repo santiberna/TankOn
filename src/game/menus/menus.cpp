@@ -13,7 +13,7 @@ void MainMenu::UpdateMenu(Application& application)
 
     if (ImGui::Button("Connect to Game"))
     {
-        application.client = std::make_unique<GameClient>(cached_username, cached_ip, 6000);
+        application.client = std::make_unique<GameClient>(cached_username, cached_ip, GAME_PORT);
         application.main_menu_stack.Push(std::make_unique<LoadingScreen>());
     }
 
@@ -21,12 +21,36 @@ void MainMenu::UpdateMenu(Application& application)
 
     if (ImGui::Button("Host Game"))
     {
-        application.server = std::make_unique<GameServer>(6000, selected_player_count);
-        application.client = std::make_unique<GameClient>(cached_username, "localhost", 6000);
+        application.server = std::make_unique<GameServer>(GAME_PORT, selected_player_count);
+        application.client = std::make_unique<GameClient>(cached_username, "localhost", GAME_PORT);
         application.main_menu_stack.Push(std::make_unique<LoadingScreen>());
     }
 
     ImGui::SliderInt("Number of players", &selected_player_count, 1, MAX_PLAYERS);
+    ImGui::Separator();
+
+    auto found = discoverer.GetFoundLobbies();
+    if (found.empty())
+    {
+        ImGui::Text("No local lobbies found...");
+    }
+    else
+    {
+        ImGui::Text("Found lobbies:");
+    }
+
+    for (auto& lobby : found)
+    {
+        ImGui::Text("%s (%s): %u/%u", lobby.hostname.c_str(), lobby.ip.c_str(), lobby.current_players, lobby.max_players);
+        ImGui::SameLine();
+
+        if (ImGui::Button("Join"))
+        {
+            application.client = std::make_unique<GameClient>(cached_username, lobby.ip, GAME_PORT);
+            application.main_menu_stack.Push(std::make_unique<LoadingScreen>());
+        }
+    }
+
     ImGui::End();
 }
 
@@ -55,6 +79,11 @@ void LoadingScreen::UpdateMenu(Application& application)
 
 void LobbyMenu::UpdateMenu(Application& application)
 {
+    if (application.server && broadcaster == nullptr)
+    {
+        broadcaster = std::make_unique<LobbyBroadcaster>();
+    }
+
     if (!application.client->GetConnection().IsOpen())
     {
         application.client.reset();
@@ -65,6 +94,9 @@ void LobbyMenu::UpdateMenu(Application& application)
     else
     {
         application.client->ProcessMessages(application);
+
+        if (application.in_game)
+            return; // Game was started
     }
 
     ImGui::Begin("Lobby");
@@ -74,6 +106,11 @@ void LobbyMenu::UpdateMenu(Application& application)
 
     uint32_t player_count = lobby.players.size();
     uint32_t player_max = lobby.max_players;
+
+    if (broadcaster)
+    {
+        broadcaster->UpdateLobbyInfo(player_count, player_max);
+    }
 
     ImGui::Text("Waiting for Players... (%u/%u)", player_count, player_max);
     ImGui::Separator();

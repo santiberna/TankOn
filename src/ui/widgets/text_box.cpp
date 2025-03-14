@@ -1,18 +1,24 @@
-#include <ui/text_box.hpp>
+#include <ui/widgets/text_box.hpp>
 
-void TextBox::SetText(const unicode::String& text)
+struct CodepointDraw
 {
-    codepoint_sequence.clear();
+    glm::vec2 offset_from_top_left {};
+    uint32_t atlas_index {};
+};
 
-    auto font_metrics = font->GetFontMetrics();
-    total_size.y = font_metrics.ascent - font_metrics.descent;
+std::vector<CodepointDraw> LayoutText(const Font& font, const unicode::String& text, const glm::vec2& area_center, const glm::vec2& area_size)
+{
+    std::vector<CodepointDraw> out {};
 
+    auto global_offset = area_center - area_size * 0.5f;
+
+    auto font_metrics = font.GetFontMetrics();
     float current_offset = 0.0f;
 
     for (size_t i = 0; i < text.size(); i++)
     {
         auto codepoint = text[i];
-        auto glyph = font->GetCodepointInfo(codepoint);
+        auto glyph = font.GetCodepointInfo(codepoint);
 
         float kerning {};
 
@@ -22,7 +28,7 @@ void TextBox::SetText(const unicode::String& text)
         }
         else
         {
-            kerning = font->GetKerning(codepoint, text[i + 1]);
+            kerning = font.GetKerning(codepoint, text[i + 1]);
         }
 
         float next_pos = glyph.advance + kerning;
@@ -32,11 +38,37 @@ void TextBox::SetText(const unicode::String& text)
             glyph.offset.y + font_metrics.ascent
         };
 
-        codepoint_sequence.emplace_back(glyph_draw_offset, glyph.atlas_index);
+        out.emplace_back(glyph_draw_offset + global_offset, glyph.atlas_index);
         current_offset += next_pos;
     }
 
-    total_size.x = current_offset;
+    return out;
+}
+
+void TextBox::Draw(Renderer& renderer, const DrawInfo& draw_params) const
+{
+    auto* sprite_atlas = font->GetAtlasTexture().handle.get();
+    SDL_SetTextureColorModFloat(sprite_atlas, colour.x, colour.y, colour.z);
+    SDL_SetTextureAlphaModFloat(sprite_atlas, colour.w);
+
+    auto layout = LayoutText(*font, text, draw_params.rect_center, draw_params.rect_size);
+
+    for (const auto& c : layout)
+    {
+        auto rect = font->GetAtlasRect(c.atlas_index);
+
+        SDL_FRect src_rect {};
+        SDL_RectToFRect(&rect, &src_rect);
+
+        SDL_FRect dst_rect {};
+        dst_rect.x = c.offset_from_top_left.x;
+        dst_rect.y = c.offset_from_top_left.y;
+        dst_rect.h = src_rect.h;
+        dst_rect.w = src_rect.w;
+
+        SDLAbortIfFailed(
+            SDL_RenderTexture(renderer.GetRenderer(), sprite_atlas, &src_rect, &dst_rect));
+    }
 }
 
 // void Renderer::RenderText(

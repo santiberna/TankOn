@@ -3,8 +3,12 @@
 #include <stb/stb_truetype.h>
 #include <math/rect_pack.hpp>
 
+#include <tracy/Tracy.hpp>
+
 std::optional<Font> Font::FromFile(SDL_Renderer* renderer, const std::string& font_file, const FontLoadInfo& load_info)
 {
+    ZoneScopedN("Font Loading");
+
     std::vector<std::byte> font_data {};
     stbtt_fontinfo font {};
 

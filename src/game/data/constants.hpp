@@ -57,7 +57,7 @@ const std::array<std::string, MAX_PLAYERS> HEART_TEXTURES {
     "assets/images/UI/HeartPurple.png",
 };
 
-const std::string GAME_FONT = { "assets/fonts/forward.ttf" };
+const std::string GAME_FONT = { "assets/fonts/arial.ttf" };
 
 constexpr glm::vec2 PLAYER_SIZE = { 0.5f, 0.5f };
 constexpr float TANK_STEER = { 0.003f };

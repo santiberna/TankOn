@@ -1,4 +1,6 @@
 #pragma once
+#include <input/signals.hpp>
+#include <utility/unicode.hpp>
 #include <SDL3/SDL_events.h>
 #include <unordered_map>
 #include <glm/vec2.hpp>
@@ -13,11 +15,15 @@ enum class InputState
     ACTIVE,
 };
 
-class InputData
+class InputEventSystem
 {
 public:
-    void UpdateInput();
     void ProcessEvent(const SDL_Event& event);
+
+    auto& OnCloseRequested() { return on_close; }
+    auto& OnTextInput() { return on_text_input; }
+
+    void UpdateInput();
 
     InputState GetKeyState(SDL_Keycode code) { return key_state[code]; }
 
@@ -44,4 +50,8 @@ private:
 
     glm::vec2 mouse_pos { -1.0f, -1.0f };
     bool exit_code = false;
+
+    bool text_enabled = true;
+    signals::signal<void()> on_close {};
+    signals::signal<void(const unicode::String&)> on_text_input {};
 };

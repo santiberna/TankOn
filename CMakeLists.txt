@@ -8,8 +8,8 @@ include(FetchContent)
 include(cmake/utility.cmake)
 
 # OPTIONS
-
-option(ENABLE_TESTS "Compile Unit Tests" OFF)
+set(BUILD_SHARED_LIBS OFF)
+option(PROFILE "Enables Tracy as a profiler" OFF)
 
 # MAIN EXECUTABLE
 

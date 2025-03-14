@@ -12,6 +12,9 @@ class Renderer
 public:
     static std::optional<Renderer> Create(uint32_t window_width, uint32_t window_height);
 
+    uint32_t GetScreenWidth() const { return window_width; }
+    uint32_t GetScreenHeight() const { return window_height; }
+
     SDL_Renderer* GetRenderer() { return renderer.get(); }
     SDL_Window* GetWindow() { return window.get(); }
 
@@ -33,6 +36,9 @@ public:
         const glm::vec4& colour);
 
 private:
+    uint32_t window_width {};
+    uint32_t window_height {};
+
     sdl::UniquePtr<SDL_Window, SDL_DestroyWindow> window {};
     sdl::UniquePtr<SDL_Renderer, SDL_DestroyRenderer> renderer {};
 };
