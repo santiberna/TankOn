@@ -8,7 +8,7 @@
 
 Application::Application()
 {
-    renderer = Renderer::Create((uint32_t)WINDOW_SIZE.x, (uint32_t)WINDOW_SIZE.y).value();
+    renderer = Renderer::Create((uint32_t)WINDOW_SIZE.x, (uint32_t)WINDOW_SIZE.y, 16.0f / 9.0f).value();
     auto* r = renderer.GetRenderer();
     renderer.SetDebugRendering(true);
     SDL_SetRenderVSync(r, 1);
@@ -37,11 +37,31 @@ Application::Application()
     info.codepoint_ranges.emplace_back(unicode::LATIN_SUPPLEMENT_CODESET);
 
     game_font = Font::SharedFromFile(renderer.GetRenderer(), GAME_FONT, info);
+
     input = std::make_unique<InputEventSystem>(renderer.GetWindow());
     ui_canvas = SetupCanvas();
 
+    // Input setup
+
     input->OnCloseRequested().connect([this]()
         { close_game = true; });
+
+    input->OnButtonClick(SDL_BUTTON_LEFT).connect([this](bool press)
+        { if (press) { shoot_requested = true; } });
+    input->OnMouseMove().connect([this](auto& pos)
+        { mouse_pos = pos; });
+
+    input->OnKeyPress(SDLK_W).connect([this](bool pressed)
+        { player_movement.y -= pressed ? 1.0f : -1.0f; });
+    input->OnKeyPress(SDLK_A).connect([this](bool pressed)
+        { player_movement.x -= pressed ? 1.0f : -1.0f; });
+    input->OnKeyPress(SDLK_S).connect([this](bool pressed)
+        { player_movement.y += pressed ? 1.0f : -1.0f; });
+    input->OnKeyPress(SDLK_D).connect([this](bool pressed)
+        { player_movement.x += pressed ? 1.0f : -1.0f; });
+
+    input->OnWindowResize().connect([this](const glm::uvec2& v)
+        { renderer.UpdateWindowBounds(v); });
 }
 
 Canvas Application::SetupCanvas()
@@ -60,8 +80,6 @@ Canvas Application::SetupCanvas()
 
 void Application::HandleInput()
 {
-    input->UpdateInput();
-
     SDL_Event event {};
     while (SDL_PollEvent(&event))
     {
@@ -75,15 +93,15 @@ void Application::DoFrame()
     DeltaMS deltatime = delta_timer.GetElapsed();
     delta_timer.Reset();
 
-    renderer.ClearScreen(colour::BLACK);
+    renderer.ClearScreen(colour::GREY);
 
     if (in_game)
         UpdateGame(deltatime);
 
-    // if (!main_menu_stack.Empty())
-    //     main_menu_stack.UpdateTop(*this);
+    if (!main_menu_stack.Empty())
+        main_menu_stack.UpdateTop(*this);
 
-    ui_canvas.RenderCanvas(renderer);
+    // ui_canvas.RenderCanvas(renderer);
 }
 
 void Application::UpdateGame(DeltaMS deltatime)
@@ -114,36 +132,17 @@ void Application::UpdateGame(DeltaMS deltatime)
 
     if (world_state.lives.at(controlled) > 0)
     {
-        glm::vec2 movement {};
 
-        if (input->GetKey(SDLK_W))
+        if (glm::epsilonNotEqual(glm::length(player_movement), 0.0f, glm::epsilon<float>()))
         {
-            movement += world::UP;
-        }
-        if (input->GetKey(SDLK_S))
-        {
-            movement -= world::UP;
-        }
-        if (input->GetKey(SDLK_D))
-        {
-            movement += world::RIGHT;
-        }
-        if (input->GetKey(SDLK_A))
-        {
-            movement -= world::RIGHT;
-        }
-
-        if (glm::epsilonNotEqual(glm::length(movement), 0.0f, glm::epsilon<float>()))
-        {
-            float rotation_add = movement.x * TANK_STEER * deltatime.count();
+            float rotation_add = player_movement.x * TANK_STEER * deltatime.count();
             current_player.base_rotation = AngleWrap(current_player.base_rotation + rotation_add);
 
             auto dir = AngleToVector(current_player.base_rotation + glm::pi<float>() * 0.5f);
-            current_player.position += dir * movement.y * TANK_SPEED * deltatime.count();
+            current_player.position += dir * player_movement.y * TANK_SPEED * deltatime.count();
             current_player.position = glm::clamp(current_player.position, MAP_BOUNDS_MIN, MAP_BOUNDS_MAX);
         }
 
-        auto mouse_pos = input->GetMousePos();
         auto towards_mouse = mouse_pos - current_player.position;
         auto angle = -VectorAngle(world::UP, glm::normalize(towards_mouse));
 
@@ -155,7 +154,7 @@ void Application::UpdateGame(DeltaMS deltatime)
             shot_cooldown -= deltatime.count();
         }
 
-        if (input->GetButtonState(SDL_BUTTON_LEFT) == InputState::PRESSED && shot_cooldown <= 0.0f)
+        if (shoot_requested && shot_cooldown <= 0.0f)
         {
             auto now = GetEpochMS();
             auto direction = -AngleToVector(current_player.weapon_rotation + glm::pi<float>() * 0.5f);
@@ -170,6 +169,7 @@ void Application::UpdateGame(DeltaMS deltatime)
             client->ShootBullet(info);
             shot_cooldown = BULLET_COOLDOWN_MS;
         }
+        shoot_requested = false;
     }
 
     for (uint32_t p = 0; p < world_state.players.size(); p++)

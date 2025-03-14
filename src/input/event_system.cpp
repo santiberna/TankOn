@@ -7,7 +7,8 @@ void InputEventSystem::ProcessEvent(const SDL_Event& ev)
     {
     case SDL_EVENT_KEY_DOWN:
     {
-        key_state[ev.key.key] = InputState::PRESSED;
+        if (ev.key.repeat) break;
+        on_key_press[ev.key.key](true);
 
         bool text_enabled = SDL_TextInputActive(window);
         if (text_enabled && ev.key.key == SDLK_BACKSPACE)
@@ -23,20 +24,22 @@ void InputEventSystem::ProcessEvent(const SDL_Event& ev)
         break;
     }
     case SDL_EVENT_KEY_UP:
-        key_state[ev.key.key] = InputState::RELEASED;
+        on_key_press[ev.key.key](false);
         break;
     case SDL_EVENT_QUIT:
         on_close();
         break;
     case SDL_EVENT_MOUSE_MOTION:
+    {
+        glm::vec2 mouse_pos{};
         SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
+        on_mouse_movement(mouse_pos);
         break;
+    }
     case SDL_EVENT_MOUSE_BUTTON_DOWN:
-        button_state[ev.button.button] = InputState::PRESSED;
         on_button_click[ev.button.button](true);
         break;
     case SDL_EVENT_MOUSE_BUTTON_UP:
-        button_state[ev.button.button] = InputState::RELEASED;
         on_button_click[ev.button.button](false);
         break;
     case SDL_EVENT_TEXT_INPUT:
@@ -45,26 +48,30 @@ void InputEventSystem::ProcessEvent(const SDL_Event& ev)
         on_text_input(string);
         break;
     }
+    case SDL_EVENT_WINDOW_RESIZED:
+    {
+        if (SDL_GetWindowID(window) != ev.window.windowID) break;
+        SDL_SyncWindow(window);
+
+        on_window_resize(glm::uvec2 { ev.window.data1, ev.window.data2});
+    }
     default:
         break;
     }
 }
 
-void InputEventSystem::UpdateInput()
+void InputEventSystem::SetTextInput(bool val) 
 {
-    for (auto&& [key, state] : key_state)
-    {
-        if (state == InputState::PRESSED)
-            state = InputState::ACTIVE;
-        else if (state == InputState::RELEASED)
-            state = InputState::NONE;
-    }
+    bool prev = SDL_TextInputActive(window);
 
-    for (auto&& [button, state] : button_state)
+    if (val && !prev)
     {
-        if (state == InputState::PRESSED)
-            state = InputState::ACTIVE;
-        else if (state == InputState::RELEASED)
-            state = InputState::NONE;
+        Log("Started Text Input");
+        SDL_StartTextInput(window);
+    }
+    else if (!val && prev)
+    {
+        Log("Stopped Text Input");
+        SDL_StopTextInput(window);
     }
 }

@@ -49,6 +49,11 @@ public:
     // Font
     std::shared_ptr<Font> game_font;
 
+    // Input slots
+    glm::vec2 player_movement {};
+    glm::vec2 mouse_pos {};
+    bool shoot_requested {};
+
 private:
     Canvas SetupCanvas();
 };

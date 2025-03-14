@@ -5,7 +5,7 @@ add_library(ThirdParty INTERFACE)
 FetchContent_Declare(
     SDL_lib
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-    GIT_TAG preview-3.1.3
+    GIT_TAG main
     GIT_SHALLOW TRUE
     GIT_PROGRESS TRUE
 )

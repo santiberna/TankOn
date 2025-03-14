@@ -1,12 +1,12 @@
 #include <engine/renderer.hpp>
 
-std::optional<Renderer> Renderer::Create(uint32_t window_width, uint32_t window_height)
+std::optional<Renderer> Renderer::Create(uint32_t window_width, uint32_t window_height, float aspect_ratio)
 {
     SDL_Window* window {};
     SDL_Renderer* renderer {};
 
     auto result = SDL_CreateWindowAndRenderer(
-        "TankOn!", window_width, window_height, 0,
+        "TankOn!", window_width, window_height, SDL_WINDOW_RESIZABLE,
         &window, &renderer);
 
     SDLCheck(result);
@@ -19,14 +19,53 @@ std::optional<Renderer> Renderer::Create(uint32_t window_width, uint32_t window_
 
     out.window_width = window_width;
     out.window_height = window_height;
+    out.aspect_ratio = aspect_ratio;
+
+    out.UpdateWindowBounds({ window_width, window_height });
 
     return out;
 }
 
+void Renderer::UpdateWindowBounds(const glm::uvec2& window_size)
+{
+    glm::vec2 float_size = { (float)window_size.x, (float)window_size.y };
+    float window_aspect = float_size.x / float_size.y;
+
+    if (window_aspect < aspect_ratio)
+    {
+        // Needs horizontal padding
+        frame_size.x = window_size.x;
+        frame_size.y = frame_size.x / aspect_ratio;
+    }
+    else
+    {
+        // Needs vertical padding
+        frame_size.y = window_size.y;
+        frame_size.x = frame_size.y * aspect_ratio;
+    }
+
+    frame_offset = float_size * 0.5f - frame_size * 0.5f;
+
+    Log("Window size: {} {}", window_size.x, window_size.y);
+    Log("Calc size: {} {}", frame_size.x, frame_size.y);
+}
+
 void Renderer::ClearScreen(const glm::vec3& colour)
 {
-    SDLAbortIfFailed(SDL_SetRenderDrawColorFloat(renderer.get(), colour.x, colour.y, colour.z, 1.0f));
+    // Clear with borders
+    SDLAbortIfFailed(SDL_SetRenderDrawColorFloat(renderer.get(), 0.0f, 0.0f, 0.0f, 1.0f));
     SDLAbortIfFailed(SDL_RenderClear(renderer.get()));
+
+    // Clear for frame area
+    SDLAbortIfFailed(SDL_SetRenderDrawColorFloat(renderer.get(), colour.x, colour.y, colour.z, 1.0f));
+
+    SDL_FRect rect {};
+    rect.x = frame_offset.x;
+    rect.y = frame_offset.y;
+    rect.w = frame_size.x;
+    rect.h = frame_size.y;
+
+    SDLAbortIfFailed(SDL_RenderFillRect(renderer.get(), &rect));
 }
 
 void Renderer::RenderSprite(

@@ -15,14 +15,14 @@ public:
             if (!pressed)
                 return;
 
-            if (CheckAABB(input.GetMousePos(), cached_draw_info.rect_size, cached_draw_info.rect_center))
-            {
-                input.SetTextInput(true);
-            }
-            else
-            {
-                input.SetTextInput(false);
-            }
+            // if (CheckAABB(input.GetMousePos(), cached_draw_info.rect_size, cached_draw_info.rect_center))
+            // {
+            //     input.SetTextInput(true);
+            // }
+            // else
+            // {
+            //     input.SetTextInput(false);
+            // }
         };
 
         auto text_handler = [this](auto& c)

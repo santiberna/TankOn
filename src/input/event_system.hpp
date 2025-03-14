@@ -24,58 +24,23 @@ public:
     {
     }
 
-    void SetTextInput(bool val)
-    {
-        bool prev = SDL_TextInputActive(window);
-
-        if (val && !prev)
-        {
-            Log("Started Text Input");
-            SDL_StartTextInput(window);
-        }
-        else if (!val && prev)
-        {
-            Log("Stopped Text Input");
-            SDL_StopTextInput(window);
-        }
-    }
-
+    void SetTextInput(bool val);
     void ProcessEvent(const SDL_Event& event);
 
     auto& OnCloseRequested() { return on_close; }
     auto& OnTextInput() { return on_text_input; }
     auto& OnButtonClick(SDL_Mousebutton button) { return on_button_click[button]; }
-
-    void UpdateInput();
-
-    InputState GetKeyState(SDL_Keycode code) { return key_state[code]; }
-
-    bool GetKey(SDL_Keycode code)
-    {
-        auto state = GetKeyState(code);
-        return state == InputState::PRESSED || state == InputState::ACTIVE;
-    }
-
-    InputState GetButtonState(SDL_Mousebutton code) { return button_state[code]; }
-
-    bool GetButton(SDL_Mousebutton code)
-    {
-        auto state = GetButtonState(code);
-        return state == InputState::PRESSED || state == InputState::ACTIVE;
-    }
-
-    bool ShouldClose() const { return exit_code; }
-    glm::vec2 GetMousePos() const { return mouse_pos; }
+    auto& OnKeyPress(SDL_Keycode key) { return on_key_press[key]; }
+    auto& OnMouseMove() { return on_mouse_movement; }
+    auto& OnWindowResize() { return on_window_resize; }
 
 private:
     SDL_Window* window {};
-    std::unordered_map<SDL_Keycode, InputState> key_state {};
-    std::unordered_map<SDL_Mousebutton, InputState> button_state {};
-
-    glm::vec2 mouse_pos { -1.0f, -1.0f };
-    bool exit_code = false;
 
     signals::signal<void()> on_close {};
+    signals::signal<void(const glm::vec2&)> on_mouse_movement {};
+    signals::signal<void(const glm::uvec2&)> on_window_resize {};
     signals::signal<void(const unicode::String&)> on_text_input {};
     std::unordered_map<SDL_Mousebutton, signals::signal<void(bool)>> on_button_click {};
+    std::unordered_map<SDL_Mousebutton, signals::signal<void(bool)>> on_key_press {};
 };

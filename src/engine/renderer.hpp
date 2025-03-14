@@ -10,7 +10,7 @@
 class Renderer
 {
 public:
-    static std::optional<Renderer> Create(uint32_t window_width, uint32_t window_height);
+    static std::optional<Renderer> Create(uint32_t window_width, uint32_t window_height, float aspect_ratio);
 
     uint32_t GetScreenWidth() const { return window_width; }
     uint32_t GetScreenHeight() const { return window_height; }
@@ -38,10 +38,17 @@ public:
     void SetDebugRendering(bool val) { debug_enabled = val; }
     bool IsDebugRendering() const { return debug_enabled; }
 
+    void UpdateWindowBounds(const glm::uvec2& window_size);
+
 private:
     bool debug_enabled = false;
+
     uint32_t window_width {};
     uint32_t window_height {};
+
+    float aspect_ratio {};
+    glm::vec2 frame_offset {};
+    glm::vec2 frame_size {};
 
     sdl::UniquePtr<SDL_Window, SDL_DestroyWindow> window {};
     sdl::UniquePtr<SDL_Renderer, SDL_DestroyRenderer> renderer {};
