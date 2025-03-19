@@ -6,6 +6,7 @@
 
 #include <network/utility/message.hpp>
 #include <math/types.hpp>
+#include <utility/timer.hpp>
 
 enum MessageType
 {
@@ -20,6 +21,24 @@ enum MessageType
     SERVER_DECLARE_WINNER,
 
     BOTH_UPDATE_PLAYER,
+
+    DEBUG_PING
+};
+
+struct DebugPingMessage
+{
+    static constexpr auto MESSAGE = "Hello world, this messages is 64 bytes!!! Yay let celebrate!!!";
+    std::string msg = MESSAGE;
+    uint32_t timestamp {};
+
+    DebugPingMessage() { timestamp = GetEpochMS().count(); }
+
+    template <typename A>
+    void serialize(A& ar)
+    {
+        ar(msg);
+        ar(timestamp);
+    }
 };
 
 struct LobbyDiscoverInfo

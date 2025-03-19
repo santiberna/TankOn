@@ -7,6 +7,7 @@
 #include <game/data/messages.hpp>
 #include <utility/timer.hpp>
 #include <game/data/constants.hpp>
+#include <network/utility/tick_timer.hpp>
 
 class Application;
 
@@ -81,6 +82,12 @@ public:
         return game_winner;
     }
 
+    uint32_t GetPingMS() const
+    {
+        std::scoped_lock<std::mutex> lock { client_mutex };
+        return ping_ms;
+    }
+
 private:
     ContextThread context_thread;
     mutable std::mutex client_mutex {};
@@ -96,4 +103,8 @@ private:
 
     LobbyInfo lobby_state;
     WorldInfo world_state;
+
+    // DEBUG
+    std::unique_ptr<TickTimer> ping_messager {};
+    uint32_t ping_ms {};
 };

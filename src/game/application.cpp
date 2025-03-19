@@ -120,6 +120,14 @@ void Application::UpdateGame(DeltaMS deltatime)
     renderer.ClearScreen(colour::SAND);
     client->ClearDeadBullets();
 
+    {
+        ImGui::Begin("Debug Menu");
+        ImGui::Text("Frametime: %f", deltatime.count());
+        ImGui::Text("Ping: %u", client->GetPingMS());
+        ImGui::Text("Incoming Messages: %zi", client->GetConnection().GetMessages().count());
+        ImGui::End();
+    }
+
     auto world_state = client->GetWorldInfo();
     auto controlled = client->GetPlayerIndex();
 
