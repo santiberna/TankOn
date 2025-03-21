@@ -145,6 +145,11 @@ void GameServer::ProcessMessages()
                 Broadcast(msg, user.connection.get());
                 break;
             }
+            case DEBUG_PING:
+            {
+                user.connection->Post(msg);
+                break;
+            }
             default:
                 throw;
             }

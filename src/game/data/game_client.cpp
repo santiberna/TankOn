@@ -22,6 +22,18 @@ GameClient::GameClient(const std::string& username, const std::string& address, 
         });
 
     resolver->AttemptConnection(address, port);
+
+    auto ping = [&]()
+    {
+        if (connection && connection->IsOpen())
+            connection->Post(AsMessage(DEBUG_PING, DebugPingMessage {}));
+    };
+
+    ping_messager = std::make_unique<TickTimer>(
+        context_thread.Context(),
+        std::chrono::milliseconds(100),
+        ping);
+
     context_thread.Start();
 }
 
@@ -87,6 +99,14 @@ void GameClient::ProcessMessages(Application& application)
         {
             std::scoped_lock<std::mutex> lock { client_mutex };
             game_winner = FromMessage<uint32_t>(msg);
+            break;
+        }
+        case DEBUG_PING:
+        {
+            std::scoped_lock<std::mutex> lock { client_mutex };
+            auto now = GetEpochMS().count();
+            auto ping = FromMessage<DebugPingMessage>(msg);
+            ping_ms = now - ping.timestamp;
             break;
         }
         default:

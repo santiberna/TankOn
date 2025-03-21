@@ -10,6 +10,7 @@ public:
 
     TickTimer(asio::io_context& context, std::chrono::milliseconds time, Event ev)
         : timer(context, time)
+        , expiry(time)
         , ev(ev)
     {
         timer.async_wait([this](std::error_code e)
@@ -18,6 +19,7 @@ public:
 
     void SetTimerExpire(std::chrono::milliseconds time)
     {
+        expiry = time;
         timer.expires_after(time);
         timer.async_wait([this](std::error_code e)
             { Handler(e); });
@@ -36,6 +38,7 @@ private:
             return;
         }
 
+        timer.expires_after(expiry);
         timer.async_wait([this](std::error_code e)
             { Handler(e); });
 
@@ -46,5 +49,6 @@ private:
     }
 
     asio::steady_timer timer;
+    std::chrono::milliseconds expiry {};
     Event ev;
 };

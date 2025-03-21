@@ -10,8 +10,8 @@ constexpr glm::vec2 WINDOW_SIZE = { 1600, 900 };
 constexpr glm::vec2 MAP_BOUNDS_MIN = { 100, 100 };
 constexpr glm::vec2 MAP_BOUNDS_MAX = { 1500, 800 };
 
-constexpr std::chrono::milliseconds LOBBY_TICK_RATE = std::chrono::milliseconds(128);
-constexpr std::chrono::milliseconds GAME_TICK_RATE = std::chrono::milliseconds(16);
+constexpr std::chrono::milliseconds LOBBY_TICK_RATE = std::chrono::milliseconds(64);
+constexpr std::chrono::milliseconds GAME_TICK_RATE = std::chrono::milliseconds(8);
 
 constexpr std::array<glm::vec2, MAX_PLAYERS> PLAYER_START_POSITIONS {
     glm::vec2(200.0f, 200.0f),
