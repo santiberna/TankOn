@@ -6,7 +6,7 @@
 
 #include <network/utility/message.hpp>
 #include <math/types.hpp>
-#include <utility/timer.hpp>
+#include <utility/time.hpp>
 
 enum MessageType
 {

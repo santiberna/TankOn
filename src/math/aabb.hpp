@@ -1,5 +1,6 @@
 #pragma once
 #include <math/types.hpp>
+#include <SDL3/SDL_rect.h>
 
 // Performs AABB checking with a point
 // AABB is centered, not top left
@@ -12,4 +13,16 @@ inline bool CheckAABB(const glm::vec2& center, const glm::vec2& size, const glm:
     bool y_bounds = point.y > top_left.y && point.y < bottom_right.y;
 
     return x_bounds && y_bounds;
+}
+
+inline SDL_FRect RectFromCenterAndSize(const glm::vec2& center, const glm::vec2& size)
+{
+    SDL_FRect dst {};
+
+    dst.x = center.x - size.x * 0.5f;
+    dst.y = center.y - size.y * 0.5f;
+    dst.w = size.x;
+    dst.h = size.y;
+
+    return dst;
 }

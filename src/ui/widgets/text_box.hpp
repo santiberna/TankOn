@@ -1,8 +1,8 @@
 #pragma once
 #include <resources/font.hpp>
-#include <ui/ui_element.hpp>
+#include <ui/core/node.hpp>
 
-class TextBox : public UIElement
+class TextBox : public UINode
 {
 public:
     TextBox(std::shared_ptr<Font> font, const unicode::String& text)
@@ -11,7 +11,7 @@ public:
     {
     }
 
-    virtual void Draw(Renderer& renderer, const DrawInfo& draw_params) const;
+    virtual void Draw(Renderer& renderer, const UIDrawInfo& draw_params, const UICursorInfo& cursor_params);
 
 protected:
     std::shared_ptr<Font> font;

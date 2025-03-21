@@ -1,7 +1,7 @@
 #pragma once
 #include <game/menu.hpp>
 #include <engine/renderer.hpp>
-#include <utility/timer.hpp>
+#include <utility/time.hpp>
 #include <game/data/game_client.hpp>
 #include <game/data/game_server.hpp>
 #include <utility/imgui_common.hpp>
@@ -9,7 +9,7 @@
 #include <resources/texture.hpp>
 #include <game/data/constants.hpp>
 #include <resources/font.hpp>
-#include <ui/canvas.hpp>
+#include <ui/core/menu.hpp>
 #include <input/event_system.hpp>
 
 struct PlayerResources
@@ -23,7 +23,7 @@ struct PlayerResources
 class Application
 {
 public:
-    Canvas ui_canvas {};
+    Menu ui_canvas {};
     MenuStack main_menu_stack {};
     Renderer renderer {};
     std::unique_ptr<InputEventSystem> input {};
@@ -52,8 +52,8 @@ public:
     // Input slots
     glm::vec2 player_movement {};
     glm::vec2 mouse_pos {};
-    bool shoot_requested {};
+    CursorState cursor {};
 
 private:
-    Canvas SetupCanvas();
+    Menu SetupCanvas();
 };

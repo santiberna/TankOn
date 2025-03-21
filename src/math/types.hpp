@@ -25,6 +25,8 @@ constexpr glm::vec2 UP = { 0.0f, -1.0f };
 constexpr glm::vec2 RIGHT = { 1.0f, 0.0f };
 }
 
+namespace math
+{
 inline float VectorAngle(const glm::vec2& from, const glm::vec2& target)
 {
     // Rotation from two unit vectors
@@ -42,4 +44,12 @@ inline glm::vec2 AngleToVector(float angle)
 inline float AngleWrap(float angle)
 {
     return std::fmodf(angle, 2.0f * glm::pi<float>());
+}
+
+template <typename T>
+T Lerp(float t, const T& a, const T& b)
+{
+    return a * (1.0f - t) + b * (t);
+}
+
 }

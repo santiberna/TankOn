@@ -98,10 +98,10 @@ void Renderer::RenderSprite(
 
 void Renderer::RenderTextureRect(
     const Texture& sprite,
-    const SDL_FRect& src,
-    const SDL_FRect& dst)
+    const SDL_FRect& dst,
+    const glm::vec4& colour,
+    const SDL_FRect* src)
 {
-
     auto screen_pos = frame_offset + WorldToScreen({ dst.x, dst.y });
     auto screen_size = WorldToScreen({ dst.w, dst.h });
 
@@ -109,10 +109,13 @@ void Renderer::RenderTextureRect(
         screen_pos.x, screen_pos.y, screen_size.x, screen_size.y
     };
 
+    SDLAbortIfFailed(SDL_SetTextureColorModFloat(sprite.handle.get(), colour.x, colour.y, colour.z));
+    SDLAbortIfFailed(SDL_SetTextureAlphaModFloat(sprite.handle.get(), colour.w));
+
     SDLAbortIfFailed(SDL_RenderTexture(
         renderer.get(),
         sprite.handle.get(),
-        &src,
+        src,
         &draw_dst));
 }
 
@@ -140,7 +143,7 @@ glm::vec2 Renderer::WorldToScreen(const glm::vec2& world) const
     return (frame_size * world) / (glm::vec2(aspect_ratio, 1.0f) * WORLD_MAGNIFICATION);
 }
 
-glm::vec2 Renderer::ScreenToWorld(const glm::vec2& screen) const
+glm::vec2 Renderer::ScreenToWorldPos(const glm::vec2& screen) const
 {
-    return (screen * glm::vec2(aspect_ratio, 1.0f) * WORLD_MAGNIFICATION) / frame_size;
+    return ((screen * glm::vec2(aspect_ratio, 1.0f) * WORLD_MAGNIFICATION) / frame_size) - frame_offset;
 }

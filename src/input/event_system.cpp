@@ -1,7 +1,7 @@
 #include <input/event_system.hpp>
 #include <SDL3/SDL_clipboard.h>
 
-void InputEventSystem::ProcessEvent(const Renderer& renderer, const SDL_Event& ev)
+void InputEventSystem::ProcessEvent(const SDL_Event& ev)
 {
     switch (ev.type)
     {
@@ -13,6 +13,7 @@ void InputEventSystem::ProcessEvent(const Renderer& renderer, const SDL_Event& e
         }
 
         bool text_enabled = SDL_TextInputActive(window);
+
         if (text_enabled && ev.key.key == SDLK_BACKSPACE)
         {
             on_text_input({ unicode::BACKSPACE_CODEPOINT });
@@ -35,21 +36,17 @@ void InputEventSystem::ProcessEvent(const Renderer& renderer, const SDL_Event& e
     {
         glm::vec2 mouse_pos{};
         SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
-        on_mouse_movement(renderer.ScreenToWorld(mouse_pos));
+        on_mouse_movement(mouse_pos);
         break;
     }
     case SDL_EVENT_MOUSE_BUTTON_DOWN:
     {
-        glm::vec2 mouse_pos {};
-        SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
-        on_button_click[ev.button.button](renderer.ScreenToWorld(mouse_pos), true);
+        on_button_click[ev.button.button](true);
         break;
     }
     case SDL_EVENT_MOUSE_BUTTON_UP:
     {
-        glm::vec2 mouse_pos {};
-        SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
-        on_button_click[ev.button.button](renderer.ScreenToWorld(mouse_pos), false);
+        on_button_click[ev.button.button](false);
         break;
     }
     case SDL_EVENT_TEXT_INPUT:

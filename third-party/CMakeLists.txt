@@ -127,6 +127,7 @@ add_subdirectory(stb)
 
 target_include_directories(ThirdParty
     INTERFACE ${Boost_INCLUDE_DIRS}
+    INTERFACE "other"
 )
 
 target_link_directories(ThirdParty

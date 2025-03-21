@@ -3,6 +3,7 @@
 #include <utility/sdl_helpers.hpp>
 #include <resources/texture.hpp>
 #include <math/types.hpp>
+#include <utility/colours.hpp>
 
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_video.h>
@@ -26,8 +27,9 @@ public:
 
     void RenderTextureRect(
         const Texture& sprite,
-        const SDL_FRect& src,
-        const SDL_FRect& dst);
+        const SDL_FRect& dst,
+        const glm::vec4& colour = colour::WHITE,
+        const SDL_FRect* src = nullptr);
 
     void RenderSprite(
         const Texture& sprite,
@@ -44,7 +46,7 @@ public:
     void UpdateWindowBounds(const glm::uvec2& window_size);
 
     glm::vec2 WorldToScreen(const glm::vec2& world) const;
-    glm::vec2 ScreenToWorld(const glm::vec2& screen) const;
+    glm::vec2 ScreenToWorldPos(const glm::vec2& screen) const;
 
 private:
     bool debug_enabled = false;

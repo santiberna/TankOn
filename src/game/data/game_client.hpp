@@ -5,7 +5,7 @@
 #include <network/tcp/resolver.hpp>
 
 #include <game/data/messages.hpp>
-#include <utility/timer.hpp>
+#include <utility/time.hpp>
 #include <game/data/constants.hpp>
 #include <network/utility/tick_timer.hpp>
 

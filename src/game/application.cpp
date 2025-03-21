@@ -4,7 +4,8 @@
 #include <glm/gtc/epsilon.hpp>
 #include <glm/gtc/constants.hpp>
 
-#include <ui/widgets/text_input.hpp>
+#include <ui/widgets/sprite.hpp>
+#include <ui/widgets/button.hpp>
 
 Application::Application()
 {
@@ -46,11 +47,11 @@ Application::Application()
     input->OnCloseRequested().connect([this]()
         { close_game = true; });
 
-    input->OnButtonClick(SDL_BUTTON_LEFT).connect([this](auto, bool press)
-        { if (press) { shoot_requested = true; } });
+    input->OnButtonClick(SDL_BUTTON_LEFT).connect([this](bool press)
+        { cursor = press ? CursorState::DOWN : CursorState::RELEASED; });
 
     input->OnMouseMove().connect([this](auto& pos)
-        { mouse_pos = pos; });
+        { mouse_pos = renderer.ScreenToWorldPos(pos); });
 
     input->OnKeyPress(SDLK_W).connect([this](bool pressed)
         { player_movement.y -= pressed ? 1.0f : -1.0f; });
@@ -63,18 +64,74 @@ Application::Application()
 
     input->OnWindowResize().connect([this](const glm::uvec2& v)
         { renderer.UpdateWindowBounds(v); });
+
+    delta_timer.Reset();
 }
 
-Canvas Application::SetupCanvas()
+Menu Application::SetupCanvas()
 {
-    Canvas canvas {};
+    Menu canvas {};
 
-    auto element = std::make_unique<TextInput>(*input, game_font, unicode::FromASCII("Hello World!"));
-    element->active = true;
-    element->colour = colour::WHITE;
-    element->transform.size = { 0.2f, 0.2f };
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            auto region = std::make_unique<Button>();
 
-    canvas.elements.emplace_back(std::move(element));
+            glm::vec2 pos = { (1.0 / 3.0) * i, (1.0 / 2.0) * j };
+            glm::vec2 size = { (1.0 / 3.0), (1.0 / 2.0) };
+
+            region->local_transform.position = pos + size * 0.5f;
+            region->local_transform.size = size;
+
+            auto expand = [target_size = size * 1.1f](Button& self, auto dt)
+            {
+                self.local_transform.size = math::Lerp(dt.count() * 0.01f, self.local_transform.size, target_size);
+            };
+
+            auto reduce = [target_size = size * 1.0f](Button& self, auto dt)
+            {
+                self.local_transform.size = math::Lerp(dt.count() * 0.01f, self.local_transform.size, target_size);
+            };
+
+            auto default_colour = [](Button& self, auto dt)
+            {
+                self.local_transform.colour = colour::WHITE;
+            };
+
+            auto hover_colour = [](Button& self, auto dt)
+            {
+                self.local_transform.colour = colour::LIGHT_GREY;
+            };
+
+            auto held_colour = [](Button& self, auto dt)
+            {
+                self.local_transform.colour = colour::GREY;
+            };
+
+            region->on_hover.connect(hover_colour);
+            region->on_hover.connect(expand);
+
+            region->on_hold.connect(held_colour);
+            region->on_hold.connect(expand);
+
+            region->on_default.connect(default_colour);
+            region->on_default.connect(reduce);
+
+            region->on_click.connect([](Button& self)
+                { Log("Pressed"); });
+
+            auto main_it = canvas.elements.insert(canvas.elements.begin(), std::move(region));
+
+            auto bar = std::make_unique<UISprite>();
+            bar->sprite = player_assets.begin()->health;
+            bar->local_transform.position = { 0.5, 0.5 };
+            bar->local_transform.pivot = { 0.5, 0.5 };
+            bar->local_transform.size = { 1.0, 0.5 };
+
+            canvas.elements.append_child(main_it, std::move(bar));
+        }
+    }
 
     return canvas;
 }
@@ -85,7 +142,7 @@ void Application::HandleInput()
     while (SDL_PollEvent(&event))
     {
         imgui_shortcuts::ProcessSDLEvent(&event);
-        input->ProcessEvent(renderer, event);
+        input->ProcessEvent(event);
     }
 }
 
@@ -94,15 +151,21 @@ void Application::DoFrame()
     DeltaMS deltatime = delta_timer.GetElapsed();
     delta_timer.Reset();
 
-    renderer.ClearScreen(colour::GREY);
+    renderer.ClearScreen(colour::BACKGROUND);
 
     if (in_game)
         UpdateGame(deltatime);
 
-    if (!main_menu_stack.Empty())
-        main_menu_stack.UpdateTop(*this);
+    // if (!main_menu_stack.Empty())
+    //     main_menu_stack.UpdateTop(*this);
 
-    ui_canvas.RenderCanvas(renderer);
+    UICursorInfo ui_input {};
+    ui_input.cursor_position = mouse_pos;
+    ui_input.cursor_state = cursor;
+    ui_input.deltatime = deltatime;
+
+    ui_canvas.RenderCanvas(renderer, ui_input);
+    cursor = CursorState::NONE;
 }
 
 void Application::UpdateGame(DeltaMS deltatime)
@@ -144,15 +207,15 @@ void Application::UpdateGame(DeltaMS deltatime)
         if (glm::epsilonNotEqual(glm::length(player_movement), 0.0f, glm::epsilon<float>()))
         {
             float rotation_add = player_movement.x * TANK_STEER * deltatime.count();
-            current_player.base_rotation = AngleWrap(current_player.base_rotation + rotation_add);
+            current_player.base_rotation = math::AngleWrap(current_player.base_rotation + rotation_add);
 
-            auto dir = AngleToVector(current_player.base_rotation + glm::pi<float>() * 0.5f);
+            auto dir = math::AngleToVector(current_player.base_rotation + glm::pi<float>() * 0.5f);
             current_player.position += dir * player_movement.y * TANK_SPEED * deltatime.count();
             current_player.position = glm::clamp(current_player.position, MAP_BOUNDS_MIN, MAP_BOUNDS_MAX);
         }
 
         auto towards_mouse = mouse_pos - current_player.position;
-        auto angle = -VectorAngle(world::UP, glm::normalize(towards_mouse));
+        auto angle = -math::VectorAngle(world::UP, glm::normalize(towards_mouse));
 
         current_player.weapon_rotation = angle;
         client->UpdateControlledPlayer(current_player);
@@ -162,10 +225,10 @@ void Application::UpdateGame(DeltaMS deltatime)
             shot_cooldown -= deltatime.count();
         }
 
-        if (shoot_requested && shot_cooldown <= 0.0f)
+        if (cursor == CursorState::DOWN && shot_cooldown <= 0.0f)
         {
             auto now = GetEpochMS();
-            auto direction = -AngleToVector(current_player.weapon_rotation + glm::pi<float>() * 0.5f);
+            auto direction = -math::AngleToVector(current_player.weapon_rotation + glm::pi<float>() * 0.5f);
 
             BulletInfo info {};
 
@@ -177,7 +240,6 @@ void Application::UpdateGame(DeltaMS deltatime)
             client->ShootBullet(info);
             shot_cooldown = BULLET_COOLDOWN_MS;
         }
-        shoot_requested = false;
     }
 
     for (uint32_t p = 0; p < world_state.players.size(); p++)
@@ -201,7 +263,7 @@ void Application::UpdateGame(DeltaMS deltatime)
 
         Transform2D transform {};
         transform.translation = bullet.start_position + bullet.direction * (float)(now.count() - bullet.start_time) * BULLET_SPEED;
-        transform.rotation = -VectorAngle(world::UP, bullet.direction);
+        transform.rotation = -math::VectorAngle(world::UP, bullet.direction);
         transform.scale = { 1.0f, 1.0f };
 
         renderer.RenderSprite(*player_assets.at(bullet.player).bullet, transform);

@@ -26,7 +26,7 @@ public:
     }
 
     void SetTextInput(bool val);
-    void ProcessEvent(const Renderer& window, const SDL_Event& event);
+    void ProcessEvent(const SDL_Event& event);
 
     auto& OnCloseRequested() { return on_close; }
     auto& OnTextInput() { return on_text_input; }
@@ -42,6 +42,6 @@ private:
     signals::signal<void(const glm::vec2&)> on_mouse_movement {};
     signals::signal<void(const glm::uvec2&)> on_window_resize {};
     signals::signal<void(const unicode::String&)> on_text_input {};
-    std::unordered_map<SDL_Mousebutton, signals::signal<void(const glm::vec2&, bool)>> on_button_click {};
+    std::unordered_map<SDL_Mousebutton, signals::signal<void(bool)>> on_button_click {};
     std::unordered_map<SDL_Keycode, signals::signal<void(bool)>> on_key_press {};
 };

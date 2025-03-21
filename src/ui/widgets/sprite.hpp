@@ -1,19 +1,14 @@
-#include <ui/ui_element.hpp>
+#include <ui/core/node.hpp>
 #include <resources/texture.hpp>
 #include <utility/log.hpp>
+#include <math/aabb.hpp>
 
-class UISprite : public UIElement
+class UISprite : public UINode
 {
 public:
     virtual ~UISprite() = default;
-
-    virtual void Draw(Renderer& renderer, const DrawInfo& draw_params) const override
-    {
-        if (sprite)
-            renderer.RenderSpriteRect(*sprite, draw_params.rect_center, draw_params.rect_size, draw_params.node_colour);
-        else
-            Log("[UI ERROR] no texture bound to UISprite widget");
-    }
+    virtual void Draw(Renderer& renderer, const UIDrawInfo& draw_params, const UICursorInfo& cursor_params) override;
 
     std::shared_ptr<Texture> sprite {};
+    bool lock_aspect = true;
 };
