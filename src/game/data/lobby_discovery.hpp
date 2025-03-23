@@ -41,7 +41,8 @@ private:
     void BroadcastLobbyInfo()
     {
         std::scoped_lock<std::mutex> lock { info_mutex };
-        auto as_string = SerializeStruct(info);
+        std::stringstream stream {};
+        auto as_string = SerializeStruct(stream, info);
         sender.Send(as_string);
     }
 
@@ -97,7 +98,9 @@ public:
         while (!listener.GetMessages().empty())
         {
             auto msg = listener.GetMessages().pop_front();
-            auto lobby_info = DeserializeStruct<LobbyDiscoverInfo>(msg);
+
+            std::stringstream stream { msg };
+            auto lobby_info = DeserializeStruct<LobbyDiscoverInfo>(stream);
 
             lobbies[lobby_info.hostname] = { lobby_info, now };
         }

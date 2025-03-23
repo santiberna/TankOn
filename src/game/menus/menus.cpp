@@ -166,7 +166,7 @@ void GameHUD::UpdateMenu(Application& application)
         }
         else
         {
-            Log("You Lost!");
+            ImGui::Text("You Lost!");
         }
         ImGui::End();
     }

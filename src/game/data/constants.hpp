@@ -11,7 +11,7 @@ constexpr glm::vec2 MAP_BOUNDS_MIN = { 100, 100 };
 constexpr glm::vec2 MAP_BOUNDS_MAX = { 1500, 800 };
 
 constexpr std::chrono::milliseconds LOBBY_TICK_RATE = std::chrono::milliseconds(64);
-constexpr std::chrono::milliseconds GAME_TICK_RATE = std::chrono::milliseconds(4);
+constexpr std::chrono::milliseconds GAME_TICK_RATE = std::chrono::milliseconds(16);
 
 constexpr std::array<glm::vec2, MAX_PLAYERS> PLAYER_START_POSITIONS {
     glm::vec2(200.0f, 200.0f),
@@ -62,3 +62,5 @@ const std::string GAME_FONT = { "assets/fonts/arial.ttf" };
 constexpr glm::vec2 PLAYER_SIZE = { 0.5f, 0.5f };
 constexpr float TANK_STEER = { 0.003f };
 constexpr float TANK_SPEED = { 0.2f };
+
+constexpr uint32_t DEBUG_PING_FREQUENCY = 250;
