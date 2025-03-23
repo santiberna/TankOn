@@ -11,8 +11,6 @@ std::optional<Renderer> Renderer::Create(uint32_t window_width, uint32_t window_
 
     SDLCheck(result);
 
-    SDLAbortIfFailed(SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND));
-
     Renderer out {};
     out.window = decltype(out.window) { window };
     out.renderer = decltype(out.renderer) { renderer };

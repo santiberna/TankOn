@@ -12,8 +12,12 @@
 Application::Application()
 {
     renderer = Renderer::Create((uint32_t)WINDOW_SIZE.x, (uint32_t)WINDOW_SIZE.y).value();
+    Log("[INFO] Initialized Window Successfully!");
     auto* r = renderer.GetRenderer();
-    SDL_SetRenderVSync(r, 1);
+
+    SDLAbortIfFailed(SDL_SetRenderVSync(r, 1));
+    SDLAbortIfFailed(SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_BLEND));
+    Log("[INFO] Initialized Renderer Successfully!");
 
     main_menu_stack.Push(std::make_unique<MainMenu>());
 
@@ -33,12 +37,15 @@ Application::Application()
 
         player_assets.emplace_back(base, weapon, shot, health);
     }
+    Log("[INFO] Loaded all Player Assets Successfully!");
 
     FontLoadInfo info {};
     info.codepoint_ranges.emplace_back(unicode::ASCII_CODESET);
     info.codepoint_ranges.emplace_back(unicode::LATIN_SUPPLEMENT_CODESET);
 
     game_font = Font::SharedFromFile(renderer.GetRenderer(), GAME_FONT, FontLoadInfo {});
+    Log("[INFO] Loaded Game font Successfully!");
+
     // ui_canvas = SetupCanvas();
 
     input.OnCloseRequested().connect([this]()
