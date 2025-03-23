@@ -228,6 +228,6 @@ void Application::UpdateGame(DeltaMS deltatime)
         transform.scale = { 1.0f, 1.0f };
 
         renderer.RenderSprite(*player_assets.at(bullet.player).bullet, transform);
-        Log("{} {}", transform.translation.x, transform.translation.y)
+        Log("{} {}", transform.translation.x, transform.translation.y);
     }
 }
