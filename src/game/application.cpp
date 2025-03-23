@@ -125,6 +125,13 @@ void Application::UpdateGame(DeltaMS deltatime)
         ImGui::Text("Frametime: %f", deltatime.count());
         ImGui::Text("Ping: %u", client->GetPingMS());
         ImGui::Text("Incoming Messages: %zi", client->GetConnection().GetMessages().count());
+
+        if (server)
+        {
+            ImGui::Separator();
+            ImGui::Text("Server Deltatime: %u", server->GetServerDeltatime().count());
+        }
+
         ImGui::End();
     }
 
@@ -178,14 +185,10 @@ void Application::UpdateGame(DeltaMS deltatime)
 
         if (input.GetButtonState(SDL_BUTTON_LEFT) == InputState::PRESSED && shot_cooldown <= 0.0f)
         {
-            auto now = GetEpochMS();
-            auto direction = -AngleToVector(current_player.weapon_rotation + glm::pi<float>() * 0.5f);
-
             BulletInfo info {};
 
-            info.direction = direction;
-            info.start_position = current_player.position + direction * BULLET_SPAWN_OFFSET;
-            info.start_time = now.count();
+            info.direction = glm::normalize(towards_mouse);
+            info.start_position = current_player.position + info.direction * BULLET_SPAWN_OFFSET;
             info.player = controlled;
 
             client->ShootBullet(info);

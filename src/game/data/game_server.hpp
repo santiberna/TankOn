@@ -23,6 +23,11 @@ public:
         context_thread.Stop();
     }
 
+    UintMS GetServerDeltatime() const
+    {
+        return server_delta.load();
+    }
+
 private:
     void Broadcast(const Message& msg, const TCPConnection* ignore);
     void HandleDisconnects();
@@ -45,4 +50,8 @@ private:
     bool started = false;
     uint32_t bullet_id_gen = 0;
     WorldInfo world_info {};
+
+    // Debug
+    UintMS last_update {};
+    std::atomic<UintMS> server_delta {};
 };
