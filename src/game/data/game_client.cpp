@@ -72,6 +72,7 @@ void GameClient::ProcessMessages(Application& application)
             std::scoped_lock<std::mutex> lock { client_mutex };
             auto data = FromMessage<BulletInfo>(msg);
             world_state.bullets.emplace_back(data);
+            Log("Bullet Registered");
             break;
         }
         case SERVER_BULLET_HIT:

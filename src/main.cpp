@@ -7,6 +7,8 @@
 
 int main(int, char*[])
 {
+    Log("[INFO] Starting Game!");
+
     SDLAbortIfFailed(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
     Log("[INFO] Initialized SDL Successfully!");
 
