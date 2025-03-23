@@ -77,7 +77,10 @@ public:
 
             std::erase_if(world_state.bullets,
                 [now](const BulletInfo& i)
-                { return i.start_time + BULLET_LIFETIME_MS < now.count(); });
+                {
+                    Log("{} {}", i.start_time + BULLET_LIFETIME_MS, now.count());
+                    return i.start_time + BULLET_LIFETIME_MS < now.count();
+                });
         }
     }
 
