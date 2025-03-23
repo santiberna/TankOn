@@ -36,6 +36,7 @@ inline void SDLAbortIfFailed(bool result)
 {
     if (!result)
     {
+        Log("[SDL ERROR]");
         Log(SDL_GetError());
         std::abort();
     }
