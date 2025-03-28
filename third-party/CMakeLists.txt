@@ -142,5 +142,6 @@ target_link_libraries(ThirdParty
     INTERFACE ImGui
     INTERFACE STB
     INTERFACE Tracy::TracyClient
+    INTERFACE magic_enum::magic_enum
     ${Boost_LIBRARIES}
     )

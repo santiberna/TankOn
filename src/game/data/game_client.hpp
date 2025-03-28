@@ -54,7 +54,12 @@ public:
     {
         std::scoped_lock<std::mutex> lock { client_mutex };
         world_state.players.at(player_id) = data;
-        connection->Post(AsMessage(BOTH_UPDATE_PLAYER, PlayerUpdate { player_id, data }));
+
+        if (player_update_timer.GetElapsed() > GAME_TICK_RATE)
+        {
+            connection->Post(AsMessage(BOTH_UPDATE_PLAYER, PlayerUpdate { player_id, data }));
+            player_update_timer.Reset();
+        }
     }
 
     void ShootBullet(const BulletInfo& bullet)
@@ -72,7 +77,9 @@ public:
 
             std::erase_if(world_state.bullets,
                 [now](const BulletInfo& i)
-                { return i.start_time + BULLET_LIFETIME_MS < now.count(); });
+                {
+                    return i.start_time + BULLET_LIFETIME_MS < now.count();
+                });
         }
     }
 
@@ -103,6 +110,7 @@ private:
 
     LobbyInfo lobby_state;
     WorldInfo world_state;
+    Timer player_update_timer {};
 
     // DEBUG
     std::unique_ptr<TickTimer> ping_messager {};

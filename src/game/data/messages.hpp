@@ -27,18 +27,15 @@ enum MessageType
 
 struct DebugPingMessage
 {
-    static constexpr auto MESSAGE = "Hello world, this messages is 64 bytes!!! Yay let celebrate!!!";
-    std::string msg = MESSAGE;
-    uint32_t timestamp {};
-
     DebugPingMessage() { timestamp = GetEpochMS().count(); }
 
     template <typename A>
     void serialize(A& ar)
     {
-        ar(msg);
         ar(timestamp);
     }
+
+    uint32_t timestamp {};
 };
 
 struct LobbyDiscoverInfo
@@ -160,27 +157,27 @@ struct PlayerUpdate
     }
 };
 
-template <typename T>
-std::string SerializeStruct(const T& data)
-{
-    std::stringstream ss {};
+void AddDebugTag(std::stringstream& str, MessageType type);
+void RemoveDebugTag(std::stringstream& str, MessageType type);
 
+template <typename T>
+std::string SerializeStruct(std::stringstream& stream, const T& data)
+{
     {
-        cereal::BinaryOutputArchive ar { ss };
+        cereal::BinaryOutputArchive ar { stream };
         ar(data);
     }
 
-    return ss.str();
+    return stream.str();
 }
 
 template <typename T>
-T DeserializeStruct(const std::string& data)
+T DeserializeStruct(std::stringstream& stream)
 {
-    std::stringstream ss { data };
     T out {};
 
     {
-        cereal::BinaryInputArchive ar { ss };
+        cereal::BinaryInputArchive ar { stream };
         ar(out);
     }
 
@@ -190,11 +187,17 @@ T DeserializeStruct(const std::string& data)
 template <typename T>
 Message AsMessage(MessageType type, const T& data)
 {
-    return Message(static_cast<uint32_t>(type), SerializeStruct(data));
+    std::stringstream str;
+    AddDebugTag(str, type);
+
+    return Message(static_cast<uint32_t>(type), SerializeStruct(str, data));
 }
 
 template <typename T>
 T FromMessage(const Message& data)
 {
-    return DeserializeStruct<T>(data.body.data);
+    std::stringstream str { data.body.data };
+    RemoveDebugTag(str, static_cast<MessageType>(data.header.type));
+
+    return DeserializeStruct<T>(str);
 }

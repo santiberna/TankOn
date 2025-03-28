@@ -31,7 +31,7 @@ GameClient::GameClient(const std::string& username, const std::string& address, 
 
     ping_messager = std::make_unique<TickTimer>(
         context_thread.Context(),
-        std::chrono::milliseconds(100),
+        std::chrono::milliseconds(DEBUG_PING_FREQUENCY),
         ping);
 
     context_thread.Start();

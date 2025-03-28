@@ -9,10 +9,16 @@
 
 Application::Application()
 {
-    renderer = Renderer::Create((uint32_t)WINDOW_SIZE.x, (uint32_t)WINDOW_SIZE.y, 16.0f / 9.0f).value();
-    auto* r = renderer.GetRenderer();
+    renderer = Renderer::Create((uint32_t)WINDOW_SIZE.x, (uint32_t)WINDOW_SIZE.y).value();
+    Log("[INFO] Initialized Window Successfully!");
+
     renderer.SetDebugRendering(true);
-    SDL_SetRenderVSync(r, 1);
+
+    auto* r = renderer.GetRenderer();
+    SDLAbortIfFailed(SDL_SetRenderVSync(r, 1));
+    SDLAbortIfFailed(SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_BLEND));
+
+    Log("[INFO] Initialized Renderer Successfully!");
 
     main_menu_stack.Push(std::make_unique<MainMenu>());
 
@@ -32,6 +38,7 @@ Application::Application()
 
         player_assets.emplace_back(base, weapon, shot, health);
     }
+    Log("[INFO] Loaded all Player Assets Successfully!");
 
     FontLoadInfo info {};
     info.codepoint_ranges.emplace_back(unicode::ASCII_CODESET);
@@ -194,6 +201,13 @@ void Application::UpdateGame(DeltaMS deltatime)
         ImGui::Text("Frametime: %f", deltatime.count());
         ImGui::Text("Ping: %u", client->GetPingMS());
         ImGui::Text("Incoming Messages: %zi", client->GetConnection().GetMessages().count());
+
+        if (server)
+        {
+            ImGui::Separator();
+            ImGui::Text("Server Deltatime: %u", server->GetServerDeltatime().count());
+        }
+
         ImGui::End();
     }
 
@@ -232,9 +246,8 @@ void Application::UpdateGame(DeltaMS deltatime)
 
             BulletInfo info {};
 
-            info.direction = direction;
-            info.start_position = current_player.position + direction * BULLET_SPAWN_OFFSET;
-            info.start_time = now.count();
+            info.direction = glm::normalize(towards_mouse);
+            info.start_position = current_player.position + info.direction * BULLET_SPAWN_OFFSET;
             info.player = controlled;
 
             client->ShootBullet(info);

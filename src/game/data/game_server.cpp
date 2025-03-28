@@ -46,8 +46,13 @@ GameServer::GameServer(uint16_t port, uint32_t players)
                 CheckBulletCollisions();
                 CheckWinner();
             }
+
+            auto now = GetEpochMS();
+            server_delta.store(now - last_update);
+            last_update = now;
         });
 
+    last_update = GetEpochMS();
     context_thread.Start();
 }
 
@@ -131,6 +136,7 @@ void GameServer::ProcessMessages()
             case CLIENT_SHOOT_BULLET:
             {
                 auto data = FromMessage<BulletInfo>(msg);
+                data.start_time = GetEpochMS().count();
                 data.bullet_id = bullet_id_gen++;
 
                 world_info.bullets.emplace_back(data);
