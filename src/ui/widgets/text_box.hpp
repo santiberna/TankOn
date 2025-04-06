@@ -5,15 +5,9 @@
 class TextBox : public UINode
 {
 public:
-    TextBox(std::shared_ptr<Font> font, const unicode::String& text)
-        : font(font)
-        , text(text)
-    {
-    }
-
     virtual void Draw(Renderer& renderer, const UIDrawInfo& draw_params, const UICursorInfo& cursor_params);
 
-protected:
     std::shared_ptr<Font> font;
     unicode::String text {};
+    float font_size {};
 };

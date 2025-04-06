@@ -1,8 +1,5 @@
-// TODO: move this to cpp
-#define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
-#include <codecvt>
-
 #include <utility/unicode.hpp>
+#include <convert.hpp>
 
 unicode::String unicode::FromASCII(const std::string& ascii)
 {
@@ -19,6 +16,17 @@ unicode::String unicode::FromASCII(const std::string& ascii)
 
 unicode::String unicode::FromUTF8(const std::string& utf8)
 {
-    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert;
-    return convert.from_bytes(utf8);
+    auto copy = utf8;
+    unicode::String out {};
+
+    while (copy.size())
+    {
+        uint32_t utf32 {};
+        auto bytes_consumed = c_utf8::capi::c_utf8_buf_to_utf32_char_b(&utf32, copy.data(), nullptr);
+        out.push_back(utf32);
+
+        copy.erase(copy.begin(), copy.begin() + bytes_consumed);
+    }
+
+    return out;
 }

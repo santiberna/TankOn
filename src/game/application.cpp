@@ -4,12 +4,9 @@
 #include <glm/gtc/epsilon.hpp>
 #include <glm/gtc/constants.hpp>
 
-#include <ui/widgets/sprite.hpp>
-#include <ui/widgets/button.hpp>
-
 Application::Application()
 {
-    renderer = Renderer::Create((uint32_t)WINDOW_SIZE.x, (uint32_t)WINDOW_SIZE.y).value();
+    renderer = Renderer::Create((uint32_t)WINDOW_SIZE.x, (uint32_t)WINDOW_SIZE.y, 16.0f / 9.0f).value();
     Log("[INFO] Initialized Window Successfully!");
 
     renderer.SetDebugRendering(true);
@@ -19,8 +16,6 @@ Application::Application()
     SDLAbortIfFailed(SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_BLEND));
 
     Log("[INFO] Initialized Renderer Successfully!");
-
-    main_menu_stack.Push(std::make_unique<MainMenu>());
 
     for (size_t i = 0; i < MAX_PLAYERS; i++)
     {
@@ -47,7 +42,9 @@ Application::Application()
     game_font = Font::SharedFromFile(renderer.GetRenderer(), GAME_FONT, info);
 
     input = std::make_unique<InputEventSystem>(renderer.GetWindow());
-    ui_canvas = SetupCanvas();
+
+    main_menu = MakeMainMenu(*this);
+    menu_stack.push(&main_menu);
 
     // Input setup
 
@@ -72,75 +69,10 @@ Application::Application()
     input->OnWindowResize().connect([this](const glm::uvec2& v)
         { renderer.UpdateWindowBounds(v); });
 
+    input->OnTextInput().connect([this](const unicode::String& text)
+        { input_text = text; });
+
     delta_timer.Reset();
-}
-
-Menu Application::SetupCanvas()
-{
-    Menu canvas {};
-
-    for (int i = 0; i < 3; i++)
-    {
-        for (int j = 0; j < 2; j++)
-        {
-            auto region = std::make_unique<Button>();
-
-            glm::vec2 pos = { (1.0 / 3.0) * i, (1.0 / 2.0) * j };
-            glm::vec2 size = { (1.0 / 3.0), (1.0 / 2.0) };
-
-            region->local_transform.position = pos + size * 0.5f;
-            region->local_transform.size = size;
-
-            auto expand = [target_size = size * 1.1f](Button& self, auto dt)
-            {
-                self.local_transform.size = math::Lerp(dt.count() * 0.01f, self.local_transform.size, target_size);
-            };
-
-            auto reduce = [target_size = size * 1.0f](Button& self, auto dt)
-            {
-                self.local_transform.size = math::Lerp(dt.count() * 0.01f, self.local_transform.size, target_size);
-            };
-
-            auto default_colour = [](Button& self, auto dt)
-            {
-                self.local_transform.colour = colour::WHITE;
-            };
-
-            auto hover_colour = [](Button& self, auto dt)
-            {
-                self.local_transform.colour = colour::LIGHT_GREY;
-            };
-
-            auto held_colour = [](Button& self, auto dt)
-            {
-                self.local_transform.colour = colour::GREY;
-            };
-
-            region->on_hover.connect(hover_colour);
-            region->on_hover.connect(expand);
-
-            region->on_hold.connect(held_colour);
-            region->on_hold.connect(expand);
-
-            region->on_default.connect(default_colour);
-            region->on_default.connect(reduce);
-
-            region->on_click.connect([](Button& self)
-                { Log("Pressed"); });
-
-            auto main_it = canvas.elements.insert(canvas.elements.begin(), std::move(region));
-
-            auto bar = std::make_unique<UISprite>();
-            bar->sprite = player_assets.begin()->health;
-            bar->local_transform.position = { 0.5, 0.5 };
-            bar->local_transform.pivot = { 0.5, 0.5 };
-            bar->local_transform.size = { 1.0, 0.5 };
-
-            canvas.elements.append_child(main_it, std::move(bar));
-        }
-    }
-
-    return canvas;
 }
 
 void Application::HandleInput()
@@ -163,122 +95,123 @@ void Application::DoFrame()
     if (in_game)
         UpdateGame(deltatime);
 
-    // if (!main_menu_stack.Empty())
-    //     main_menu_stack.UpdateTop(*this);
-
     UICursorInfo ui_input {};
     ui_input.cursor_position = mouse_pos;
     ui_input.cursor_state = cursor;
     ui_input.deltatime = deltatime;
+    ui_input.typed_characters = input_text;
 
-    ui_canvas.RenderCanvas(renderer, ui_input);
+    if (!menu_stack.empty())
+        menu_stack.top()->Draw(renderer, ui_input);
+
+    input_text = {};
     cursor = CursorState::NONE;
 }
 
 void Application::UpdateGame(DeltaMS deltatime)
 {
-    if (!client->GetConnection().IsOpen())
-    {
-        client.reset();
-        server.reset();
-        in_game = false;
+    // if (!client->GetConnection().IsOpen())
+    // {
+    //     client.reset();
+    //     server.reset();
+    //     in_game = false;
 
-        main_menu_stack.Pop();
-        main_menu_stack.Push(std::make_unique<MainMenu>());
+    //     main_menu_stack.Pop();
+    //     main_menu_stack.Push(std::make_unique<MainMenu>());
 
-        return;
-    }
-    else
-    {
-        client->ProcessMessages(*this);
-    }
+    //     return;
+    // }
+    // else
+    // {
+    //     client->ProcessMessages(*this);
+    // }
 
-    renderer.ClearScreen(colour::SAND);
-    client->ClearDeadBullets();
+    // renderer.ClearScreen(colour::SAND);
+    // client->ClearDeadBullets();
 
-    {
-        ImGui::Begin("Debug Menu");
-        ImGui::Text("Frametime: %f", deltatime.count());
-        ImGui::Text("Ping: %u", client->GetPingMS());
-        ImGui::Text("Incoming Messages: %zi", client->GetConnection().GetMessages().count());
+    // {
+    //     ImGui::Begin("Debug Menu");
+    //     ImGui::Text("Frametime: %f", deltatime.count());
+    //     ImGui::Text("Ping: %u", client->GetPingMS());
+    //     ImGui::Text("Incoming Messages: %zi", client->GetConnection().GetMessages().count());
 
-        if (server)
-        {
-            ImGui::Separator();
-            ImGui::Text("Server Deltatime: %u", server->GetServerDeltatime().count());
-        }
+    //     if (server)
+    //     {
+    //         ImGui::Separator();
+    //         ImGui::Text("Server Deltatime: %u", server->GetServerDeltatime().count());
+    //     }
 
-        ImGui::End();
-    }
+    //     ImGui::End();
+    // }
 
-    auto world_state = client->GetWorldInfo();
-    auto controlled = client->GetPlayerIndex();
+    // auto world_state = client->GetWorldInfo();
+    // auto controlled = client->GetPlayerIndex();
 
-    auto& current_player = world_state.players.at(controlled);
+    // auto& current_player = world_state.players.at(controlled);
 
-    if (world_state.lives.at(controlled) > 0)
-    {
-        if (glm::epsilonNotEqual(glm::length(player_movement), 0.0f, glm::epsilon<float>()))
-        {
-            float rotation_add = player_movement.x * TANK_STEER * deltatime.count();
-            current_player.base_rotation = math::AngleWrap(current_player.base_rotation + rotation_add);
+    // if (world_state.lives.at(controlled) > 0)
+    // {
+    //     if (glm::epsilonNotEqual(glm::length(player_movement), 0.0f, glm::epsilon<float>()))
+    //     {
+    //         float rotation_add = player_movement.x * TANK_STEER * deltatime.count();
+    //         current_player.base_rotation = math::AngleWrap(current_player.base_rotation + rotation_add);
 
-            auto dir = math::AngleToVector(current_player.base_rotation + glm::pi<float>() * 0.5f);
-            current_player.position += dir * player_movement.y * TANK_SPEED * deltatime.count();
-            current_player.position = glm::clamp(current_player.position, MAP_BOUNDS_MIN, MAP_BOUNDS_MAX);
-        }
+    //         auto dir = math::AngleToVector(current_player.base_rotation + glm::pi<float>() * 0.5f);
+    //         current_player.position += dir * player_movement.y * TANK_SPEED * deltatime.count();
+    //         current_player.position = glm::clamp(current_player.position, MAP_BOUNDS_MIN, MAP_BOUNDS_MAX);
+    //     }
 
-        auto towards_mouse = mouse_pos - current_player.position;
-        auto angle = -math::VectorAngle(world::UP, glm::normalize(towards_mouse));
+    //     auto towards_mouse = mouse_pos - current_player.position;
+    //     auto angle = -math::VectorAngle(world::UP, glm::normalize(towards_mouse));
 
-        current_player.weapon_rotation = angle;
-        client->UpdateControlledPlayer(current_player);
+    //     current_player.weapon_rotation = angle;
+    //     client->UpdateControlledPlayer(current_player);
 
-        if (shot_cooldown > 0.0f)
-        {
-            shot_cooldown -= deltatime.count();
-        }
+    //     if (shot_cooldown > 0.0f)
+    //     {
+    //         shot_cooldown -= deltatime.count();
+    //     }
 
-        if (cursor == CursorState::DOWN && shot_cooldown <= 0.0f)
-        {
-            auto now = GetEpochMS();
-            auto direction = -math::AngleToVector(current_player.weapon_rotation + glm::pi<float>() * 0.5f);
+    //     if (cursor == CursorState::DOWN && shot_cooldown <= 0.0f)
+    //     {
+    //         auto now = GetEpochMS();
+    //         auto direction = -math::AngleToVector(current_player.weapon_rotation + glm::pi<float>() * 0.5f);
 
-            BulletInfo info {};
+    //         BulletInfo info {};
 
-            info.direction = glm::normalize(towards_mouse);
-            info.start_position = current_player.position + info.direction * BULLET_SPAWN_OFFSET;
-            info.player = controlled;
+    //         info.direction = glm::normalize(towards_mouse);
+    //         info.start_position = current_player.position + info.direction * BULLET_SPAWN_OFFSET;
+    //         info.player = controlled;
 
-            client->ShootBullet(info);
-            shot_cooldown = BULLET_COOLDOWN_MS;
-        }
-    }
+    //         client->ShootBullet(info);
+    //         shot_cooldown = BULLET_COOLDOWN_MS;
+    //     }
+    // }
 
-    for (uint32_t p = 0; p < world_state.players.size(); p++)
-    {
-        if (world_state.lives.at(p) == 0)
-            continue;
+    // for (uint32_t p = 0; p < world_state.players.size(); p++)
+    // {
+    //     if (world_state.lives.at(p) == 0)
+    //         continue;
 
-        auto& player_data = world_state.players.at(p);
-        auto& player_textures = player_assets.at(p);
+    //     auto& player_data = world_state.players.at(p);
+    //     auto& player_textures = player_assets.at(p);
 
-        Transform2D player = { player_data.position, PLAYER_SIZE, player_data.base_rotation };
-        renderer.RenderSprite(*player_textures.base, player);
+    //     Transform2D player = { player_data.position, PLAYER_SIZE, player_data.base_rotation };
+    //     renderer.RenderSprite(*player_textures.base, player);
 
-        player.rotation = player_data.weapon_rotation;
-        renderer.RenderSprite(*player_textures.weapon, player);
-    }
+    //     player.rotation = player_data.weapon_rotation;
+    //     renderer.RenderSprite(*player_textures.weapon, player);
+    // }
 
-    for (auto& bullet : world_state.bullets)
-    {
-        auto now = GetEpochMS();
+    // for (auto& bullet : world_state.bullets)
+    // {
+    //     auto now = GetEpochMS();
 
-        Transform2D transform {};
-        transform.translation = bullet.start_position + bullet.direction * (float)(now.count() - bullet.start_time) * BULLET_SPEED;
-        transform.rotation = -math::VectorAngle(world::UP, bullet.direction);
-        transform.scale = { 1.0f, 1.0f };
+    //     Transform2D transform {};
+    //     transform.translation = bullet.start_position + bullet.direction * (float)(now.count() - bullet.start_time) * BULLET_SPEED;
+    //     transform.rotation = -math::VectorAngle(world::UP, bullet.direction);
+    //     transform.scale = { 1.0f, 1.0f };
 
-        renderer.RenderSprite(*player_assets.at(bullet.player).bullet, transform);
-    }
+    //     renderer.RenderSprite(*player_assets.at(bullet.player).bullet, transform);
+    // }
 }

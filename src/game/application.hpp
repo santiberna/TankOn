@@ -23,8 +23,13 @@ struct PlayerResources
 class Application
 {
 public:
-    Menu ui_canvas {};
-    MenuStack main_menu_stack {};
+    Menu main_menu {};
+    Menu settings_menu {};
+    Menu lobby_menu {};
+    Menu loading_menu {};
+
+    std::stack<Menu*> menu_stack {};
+
     Renderer renderer {};
     std::unique_ptr<InputEventSystem> input {};
     Timer delta_timer {};
@@ -53,6 +58,7 @@ public:
     glm::vec2 player_movement {};
     glm::vec2 mouse_pos {};
     CursorState cursor {};
+    unicode::String input_text {};
 
 private:
     Menu SetupCanvas();

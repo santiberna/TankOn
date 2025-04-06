@@ -62,8 +62,8 @@ void GameClient::ProcessMessages(Application& application)
             std::scoped_lock<std::mutex> lock { client_mutex };
             world_state = FromMessage<WorldInfo>(msg);
 
-            application.main_menu_stack.Clear();
-            application.main_menu_stack.Push(std::make_unique<GameHUD>());
+            // application.main_menu_stack.Clear();
+            // application.main_menu_stack.Push(std::make_unique<GameHUD>());
             application.in_game = true;
             break;
         }

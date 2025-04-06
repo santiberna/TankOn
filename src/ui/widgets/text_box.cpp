@@ -21,7 +21,7 @@ float CalcKerning(const Font& font, const unicode::String& text, size_t index)
     return out;
 }
 
-std::vector<CodepointDraw> LayoutText(const Font& font, const unicode::String& text, const glm::vec2& area_center, const glm::vec2& area_size)
+std::vector<CodepointDraw> LayoutText(const Font& font, const unicode::String& text, float font_scale, const glm::vec2& area_center, const glm::vec2& area_size)
 {
     std::vector<CodepointDraw> out {};
 
@@ -29,20 +29,21 @@ std::vector<CodepointDraw> LayoutText(const Font& font, const unicode::String& t
     auto font_metrics = font.GetFontMetrics();
     glm::vec2 current_offset = {};
 
-    float next_line = (font_metrics.line_gap - font_metrics.descent + font_metrics.ascent);
+    float next_line = (font_metrics.line_gap - font_metrics.descent + font_metrics.ascent) * font_scale;
 
     for (size_t i = 0; i < text.size(); i++)
     {
+
         // Get codepoint
         auto codepoint = text[i];
         auto glyph = font.GetCodepointInfo(codepoint);
 
-        float kerning = CalcKerning(font, text, i);
-        float next_pos = glyph.advance + kerning;
+        float kerning = CalcKerning(font, text, i) * font_scale;
+        float next_pos = (glyph.advance * font_scale) + kerning;
 
         glm::vec2 glyph_draw_offset = glm::vec2 {
-            glyph.left_bearing,
-            glyph.offset.y + font_metrics.ascent
+            glyph.left_bearing * font_scale,
+            (glyph.offset.y + font_metrics.ascent) * font_scale
         };
 
         if (current_offset.x + next_pos > area_size.x)
@@ -51,8 +52,10 @@ std::vector<CodepointDraw> LayoutText(const Font& font, const unicode::String& t
             current_offset.y += next_line;
 
             // Early out, no more space for characters
-            if (current_offset.y + font_metrics.ascent > area_size.y)
+            if (current_offset.y + font_metrics.ascent * font_scale > area_size.y)
+            {
                 return out;
+            }
 
             glyph_draw_offset += current_offset;
         }
@@ -79,20 +82,21 @@ void TextBox::Draw(Renderer& renderer, const UIDrawInfo& draw_params, const UICu
 
     SDL_SetTextureAlphaModFloat(sprite_atlas.handle.get(), draw_params.node_colour.w);
 
-    auto layout = LayoutText(*font, text, draw_params.rect_center, draw_params.rect_size);
+    auto layout = LayoutText(*font, text, font_size, draw_params.rect_center, draw_params.rect_size);
 
     for (const auto& c : layout)
     {
         auto rect = font->GetAtlasRect(c.atlas_index);
+        auto draw_off = c.offset_from_top_left;
 
         SDL_FRect src_rect {};
         SDL_RectToFRect(&rect, &src_rect);
 
         SDL_FRect dst_rect {};
-        dst_rect.x = c.offset_from_top_left.x;
-        dst_rect.y = c.offset_from_top_left.y;
-        dst_rect.h = src_rect.h;
-        dst_rect.w = src_rect.w;
+        dst_rect.x = draw_off.x;
+        dst_rect.y = draw_off.y;
+        dst_rect.h = src_rect.h * font_size;
+        dst_rect.w = src_rect.w * font_size;
 
         renderer.RenderTextureRect(sprite_atlas, dst_rect, colour::WHITE, &src_rect);
     }

@@ -5,11 +5,11 @@
 
 struct Menu
 {
-    using ElementTree = tr::tree<std::unique_ptr<UINode>>;
-    using ElementIterator = ElementTree::iterator;
+    using NodeTree = tr::tree<std::unique_ptr<UINode>>;
+    using NodeIterator = NodeTree::iterator;
 
-    ElementTree elements {};
+    NodeTree elements {};
 
-    void RenderCanvas(Renderer& renderer, const UICursorInfo& cursor_params);
-    void DrawElement(Renderer& renderer, ElementIterator element, const UIDrawInfo& parent_info, const UICursorInfo& cursor_params);
+    void Draw(Renderer& renderer, const UICursorInfo& cursor_params);
+    void DrawElement(Renderer& renderer, NodeIterator element, const UIDrawInfo& parent_info, const UICursorInfo& cursor_params);
 };

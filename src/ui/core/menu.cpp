@@ -1,7 +1,7 @@
 
 #include <ui/core/menu.hpp>
 
-void Menu::RenderCanvas(Renderer& renderer, const UICursorInfo& cursor_params)
+void Menu::Draw(Renderer& renderer, const UICursorInfo& cursor_params)
 {
     glm::vec2 frame_size = glm::vec2(WORLD_MAGNIFICATION * renderer.GetFrameAspectRatio(), WORLD_MAGNIFICATION);
 
@@ -12,14 +12,14 @@ void Menu::RenderCanvas(Renderer& renderer, const UICursorInfo& cursor_params)
     };
 
     // loop through all root ui elements
-    for (ElementIterator it = elements.begin(); it != elements.end(); it = elements.next_sibling(it))
+    for (auto it = elements.begin(); it != elements.end(); it = elements.next_sibling(it))
     {
         // Log("Drawing Root Element");
         DrawElement(renderer, it, initial, cursor_params);
     }
 }
 
-void Menu::DrawElement(Renderer& renderer, ElementIterator element, const UIDrawInfo& parent_info, const UICursorInfo& cursor_params)
+void Menu::DrawElement(Renderer& renderer, NodeIterator element, const UIDrawInfo& parent_info, const UICursorInfo& cursor_params)
 {
     auto& elem = **element;
 
@@ -40,7 +40,7 @@ void Menu::DrawElement(Renderer& renderer, ElementIterator element, const UIDraw
         }
     }
 
-    for (ElementIterator it = elements.begin(element); it != elements.end(element); ++it)
+    for (auto it = elements.begin(element); it != elements.end(element); ++it)
     {
         // Log("Drawing Child Element");
         DrawElement(renderer, it, current_draw_info, cursor_params);

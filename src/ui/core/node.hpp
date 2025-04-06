@@ -3,6 +3,7 @@
 #include <utility/colours.hpp>
 #include <engine/renderer.hpp>
 #include <utility/time.hpp>
+#include <utility/unicode.hpp>
 
 struct RectTransform
 {
@@ -34,6 +35,8 @@ struct UICursorInfo
     glm::vec2 cursor_position {}; // Needs to be mapped to the frame
     CursorState cursor_state {};
     DeltaMS deltatime {};
+
+    unicode::String typed_characters {};
 };
 
 class UINode
