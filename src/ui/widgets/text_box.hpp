@@ -9,5 +9,5 @@ public:
 
     std::shared_ptr<Font> font;
     unicode::String text {};
-    float font_size {};
+    float font_size = 1.0f;
 };

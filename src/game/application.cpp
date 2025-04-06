@@ -9,8 +9,6 @@ Application::Application()
     renderer = Renderer::Create((uint32_t)WINDOW_SIZE.x, (uint32_t)WINDOW_SIZE.y, 16.0f / 9.0f).value();
     Log("[INFO] Initialized Window Successfully!");
 
-    renderer.SetDebugRendering(true);
-
     auto* r = renderer.GetRenderer();
     SDLAbortIfFailed(SDL_SetRenderVSync(r, 1));
     SDLAbortIfFailed(SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_BLEND));
