@@ -55,7 +55,6 @@ std::optional<Font> Font::FromFile(SDL_Renderer* renderer, const std::string& fo
     }
 
     // Collect all kerning data
-
     std::unordered_map<unicode::CodepointPair, float> kerning_table {};
 
     for (size_t i = 0; i < codepoints_found.size(); i++)
@@ -136,7 +135,6 @@ std::optional<Font> Font::FromFile(SDL_Renderer* renderer, const std::string& fo
 
         if (render)
         {
-
             for (int j = 0; j < height; j++)
             {
                 for (int i = 0; i < width; i++)
@@ -148,34 +146,22 @@ std::optional<Font> Font::FromFile(SDL_Renderer* renderer, const std::string& fo
                     font_atlas.data.at(atlas_index) = pixel_val;
                 }
             }
-
-            stbtt_FreeBitmap(render, nullptr);
         }
 
-        for (auto pixel : font_atlas.data)
-        {
-            uint8_t r = pixel >> 16;
-            uint8_t g = pixel >> 8;
-            uint8_t b = pixel;
-
-            assert(r == 0xFF || r == 0);
-            assert(g == 0xFF || g == 0);
-            assert(b == 0xFF || b == 0);
-        }
+        stbtt_FreeBitmap(render, nullptr);
     }
 
     Font out {};
 
-    if (auto texture = Texture::FromImage(renderer, font_atlas))
+    if (auto texture = Texture::SharedFromImage(renderer, font_atlas))
     {
-        out.font_atlas = std::move(texture.value());
+        out.font_atlas = AtlasTexture::FromTextureAndRects(texture, std::move(packed_codepoints.packed_rects));
     }
     else
     {
         return std::nullopt;
     }
 
-    out.codepoint_rects = std::move(packed_codepoints.packed_rects);
     out.codepoint_data = std::move(codepoint_info);
     out.kerning_table = std::move(kerning_table);
     out.font_metrics = metrics;
@@ -189,6 +175,7 @@ CodepointInfo Font::GetCodepointInfo(unicode::Codepoint codepoint) const
     {
         return it->second;
     }
+
     return codepoint_data.find(unicode::MISSING_CODEPOINT)->second;
 }
 

@@ -26,9 +26,24 @@ class Texture
 {
 public:
     static std::optional<Texture> FromImage(SDL_Renderer* renderer, const Image& image);
+
     static std::shared_ptr<Texture> SharedFromImage(SDL_Renderer* renderer, const Image& image)
     {
         if (auto texture = FromImage(renderer, image))
+            return std::make_shared<Texture>(std::move(texture.value()));
+        return nullptr;
+    }
+
+    static std::optional<Texture> FromFile(SDL_Renderer* renderer, const std::string& path)
+    {
+        if (auto image = Image::FromFile(path))
+            return FromImage(renderer, image.value());
+        return std::nullopt;
+    }
+
+    static std::shared_ptr<Texture> SharedFromFile(SDL_Renderer* renderer, const std::string& path)
+    {
+        if (auto texture = FromFile(renderer, path))
             return std::make_shared<Texture>(std::move(texture.value()));
         return nullptr;
     }

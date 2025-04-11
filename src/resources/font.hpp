@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <utility/unicode.hpp>
-#include <resources/texture.hpp>
+#include <resources/atlas.hpp>
 #include <unordered_map>
 
 struct FontMetrics
@@ -39,12 +39,11 @@ public:
         return nullptr;
     }
 
-    const Texture& GetAtlasTexture() const { return font_atlas; }
     FontMetrics GetFontMetrics() const { return font_metrics; }
 
-    SDL_Rect GetAtlasRect(uint32_t index) const
+    std::optional<AtlasView> GetAtlasView(uint32_t index) const
     {
-        return codepoint_rects.at(index);
+        return font_atlas.GetSprite(index);
     }
 
     CodepointInfo GetCodepointInfo(unicode::Codepoint codepoint) const;
@@ -57,6 +56,5 @@ private:
     std::unordered_map<unicode::CodepointPair, float> kerning_table {};
 
     // Atlas
-    std::vector<SDL_Rect> codepoint_rects {};
-    Texture font_atlas {};
+    AtlasTexture font_atlas {};
 };

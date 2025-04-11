@@ -4,8 +4,12 @@
 #include <glm/gtc/epsilon.hpp>
 #include <glm/gtc/constants.hpp>
 
+#include <tracy/Tracy.hpp>
+
 Application::Application()
 {
+    ZoneScopedN("Engine Initialization");
+
     renderer = Renderer::Create((uint32_t)WINDOW_SIZE.x, (uint32_t)WINDOW_SIZE.y, 16.0f / 9.0f).value();
     Log("[INFO] Initialized Window Successfully!");
 
@@ -42,6 +46,7 @@ Application::Application()
     input = std::make_unique<InputEventSystem>(renderer.GetWindow());
 
     main_menu = MakeMainMenu(*this);
+    settings_menu = MakeSettingsMenu(*this);
     menu_stack.push(&main_menu);
 
     // Input setup
@@ -91,7 +96,10 @@ void Application::DoFrame()
     renderer.ClearScreen(colour::BACKGROUND);
 
     if (in_game)
+    {
+        ZoneScopedN("Game Update");
         UpdateGame(deltatime);
+    }
 
     UICursorInfo ui_input {};
     ui_input.cursor_position = mouse_pos;
@@ -100,7 +108,10 @@ void Application::DoFrame()
     ui_input.typed_characters = input_text;
 
     if (!menu_stack.empty())
+    {
+        ZoneScopedN("UI Drawing");
         menu_stack.top()->Draw(renderer, ui_input);
+    }
 
     input_text = {};
     cursor = CursorState::NONE;

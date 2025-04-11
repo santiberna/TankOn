@@ -44,3 +44,4 @@ class Application;
 // };
 
 Menu MakeMainMenu(Application& app);
+Menu MakeSettingsMenu(Application& app);

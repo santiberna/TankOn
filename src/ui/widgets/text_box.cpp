@@ -73,24 +73,15 @@ std::vector<CodepointDraw> LayoutText(const Font& font, const unicode::String& t
 
 void TextBox::Draw(Renderer& renderer, const UIDrawInfo& draw_params, const UICursorInfo& cursor_params)
 {
-    auto& sprite_atlas = font->GetAtlasTexture();
-
-    SDL_SetTextureColorModFloat(sprite_atlas.handle.get(),
-        draw_params.node_colour.x,
-        draw_params.node_colour.y,
-        draw_params.node_colour.z);
-
-    SDL_SetTextureAlphaModFloat(sprite_atlas.handle.get(), draw_params.node_colour.w);
-
     auto layout = LayoutText(*font, text, font_size, draw_params.rect_center, draw_params.rect_size);
 
     for (const auto& c : layout)
     {
-        auto rect = font->GetAtlasRect(c.atlas_index);
+        auto rect = font->GetAtlasView(c.atlas_index).value();
         auto draw_off = c.offset_from_top_left;
 
         SDL_FRect src_rect {};
-        SDL_RectToFRect(&rect, &src_rect);
+        SDL_RectToFRect(&rect.rect, &src_rect);
 
         SDL_FRect dst_rect {};
         dst_rect.x = draw_off.x;
@@ -98,6 +89,6 @@ void TextBox::Draw(Renderer& renderer, const UIDrawInfo& draw_params, const UICu
         dst_rect.h = src_rect.h * font_size;
         dst_rect.w = src_rect.w * font_size;
 
-        renderer.RenderTextureRect(sprite_atlas, dst_rect, colour::WHITE, &src_rect);
+        renderer.RenderTextureRect(*rect.owning_texture, dst_rect, draw_params.node_colour, &src_rect);
     }
 }

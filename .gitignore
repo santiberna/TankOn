@@ -5,6 +5,7 @@
 
 imgui.ini
 package/
+build/
 
 # VS-Code
 .vscode

@@ -4,6 +4,7 @@
 #include <game/application.hpp>
 
 #include <game/data/lobby_discovery.hpp>
+#include <tracy/Tracy.hpp>
 
 int main(int, char*[])
 {
@@ -35,6 +36,7 @@ int main(int, char*[])
 
             imgui_shortcuts::EndFrame(game.renderer.GetRenderer());
             SDL_RenderPresent(game.renderer.GetRenderer());
+            FrameMark;
         }
 
         imgui_shortcuts::ShutdownSDL3();
