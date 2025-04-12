@@ -34,8 +34,7 @@ void TextInput::Draw(Renderer& renderer, const UIDrawInfo& draw_params, const UI
 
         if (cursor_highlight)
         {
-            auto font_metrics
-                = font->GetFontMetrics();
+            auto font_metrics = font->GetFontMetrics();
             auto last_point = cached_layout.back().offset_from_top_left + draw_params.rect_center - draw_params.rect_size * 0.5f;
 
             glm::vec2 size = glm::vec2 { 0.0f, (font_metrics.ascent - font_metrics.descent) * font_size };
