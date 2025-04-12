@@ -12,18 +12,24 @@ void InputEventSystem::ProcessEvent(const SDL_Event& ev)
             on_key_press[ev.key.key](true);
         }
 
-        bool text_enabled = SDL_TextInputActive(window);
+        if (SDL_TextInputActive(window))
+        {
+            if (ev.key.key == SDLK_BACKSPACE)
+            {
+                on_text_input({ unicode::BACKSPACE_CODEPOINT });
+            }
+            if (ev.key.key == SDLK_V && ev.key.mod & SDL_KMOD_CTRL)
+            {
+                char* data = SDL_GetClipboardText();
+                on_text_input(unicode::FromUTF8({ data }));
+                SDL_free(data);
+            }
+            if (ev.key.key == SDLK_RETURN)
+            {
+                on_text_input({ unicode::LINEBREAK_CODEPOINT });
+            }
+        }
 
-        if (text_enabled && ev.key.key == SDLK_BACKSPACE)
-        {
-            on_text_input({ unicode::BACKSPACE_CODEPOINT });
-        }
-        if (text_enabled && ev.key.key == SDLK_V && ev.key.mod & SDL_KMOD_CTRL)
-        {
-            char* data = SDL_GetClipboardText();
-            on_text_input(unicode::FromUTF8({ data }));
-            SDL_free(data);
-        }
         break;
     }
     case SDL_EVENT_KEY_UP:

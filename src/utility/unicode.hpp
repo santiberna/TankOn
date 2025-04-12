@@ -11,6 +11,7 @@ using CodepointPair = std::pair<char32_t, char32_t>;
 
 using String = std::basic_string<Codepoint>;
 using StringView = std::basic_string_view<Codepoint>;
+using InputStringStream = std::basic_istringstream<Codepoint>;
 
 constexpr Codepoint SPACE_CODEPOINT = 0x20;
 constexpr Codepoint LINEBREAK_CODEPOINT = 0x0A;
@@ -22,6 +23,7 @@ constexpr std::pair<Codepoint, Codepoint> LATIN_SUPPLEMENT_CODESET = { 0x80, 0xF
 
 String FromASCII(const std::string& ascii);
 String FromUTF8(const std::string& utf8);
+std::wstring AsWideString(const unicode::String& unicode);
 }
 
 // Relevant specializations

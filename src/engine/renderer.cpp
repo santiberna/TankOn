@@ -136,6 +136,19 @@ void Renderer::RenderRect(
     SDLAbortIfFailed(SDL_RenderRect(renderer.get(), &rect));
 }
 
+void Renderer::RenderLine(
+    const glm::vec2& p1,
+    const glm::vec2& p2,
+    const glm::vec4& colour)
+{
+
+    auto screen_pos1 = frame_offset + WorldToScreen(p1);
+    auto screen_pos2 = frame_offset + WorldToScreen(p2);
+
+    SDL_SetRenderDrawColorFloat(renderer.get(), colour.x, colour.y, colour.z, colour.w);
+    SDL_RenderLine(renderer.get(), screen_pos1.x, screen_pos1.y, screen_pos2.x, screen_pos2.y);
+}
+
 glm::vec2 Renderer::WorldToScreen(const glm::vec2& world) const
 {
     return (frame_size * world) / (glm::vec2(aspect_ratio, 1.0f) * WORLD_MAGNIFICATION);

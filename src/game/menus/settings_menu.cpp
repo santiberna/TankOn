@@ -113,7 +113,7 @@ Menu MakeSettingsMenu(Application& app)
         checkbox->on_value_set.connect(show_hide);
         checkbox->on_value_set.connect(enable_debug_ui_render);
 
-        checkbox->on_value_set(*checkbox.get(), true);
+        checkbox->on_value_set(*checkbox.get(), app.renderer.IsDebugRendering());
 
         auto parent = canvas.elements.insert(canvas.elements.begin(), std::move(checkbox_panel));
         canvas.elements.append_child(parent, std::move(text));

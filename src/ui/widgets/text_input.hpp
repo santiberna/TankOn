@@ -10,4 +10,8 @@ public:
 
     signals::signal<void(TextInput&, bool)> on_click;
     bool selected = false;
+
+    float cursor_highlight_timer {};
+    float cursor_highlight_switch { 500.0f };
+    bool cursor_highlight = false;
 };

@@ -30,3 +30,11 @@ unicode::String unicode::FromUTF8(const std::string& utf8)
 
     return out;
 }
+
+std::wstring unicode::AsWideString(const unicode::String& unicode)
+{
+    std::wstring out;
+    for (auto c : unicode)
+        out.push_back((wchar_t)(c));
+    return out;
+}

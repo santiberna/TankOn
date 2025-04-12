@@ -40,6 +40,11 @@ public:
         const glm::vec2& size,
         const glm::vec4& colour);
 
+    void RenderLine(
+        const glm::vec2& p1,
+        const glm::vec2& p2,
+        const glm::vec4& colour);
+
     void SetDebugRendering(bool val) { debug_enabled = val; }
     bool IsDebugRendering() const { return debug_enabled; }
 
