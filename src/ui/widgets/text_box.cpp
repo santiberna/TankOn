@@ -43,59 +43,116 @@ std::vector<unicode::String> SplitIntoWords(const unicode::String& text)
     return out;
 }
 
-std::vector<CodepointDraw> LayoutText(const Font& font, const unicode::String& text, float font_scale, const glm::vec2& area_size)
+std::vector<CodepointDraw> LayoutText(const Font& font, const unicode::String& text, float font_scale, const glm::vec2& area_size, glm::bvec2 center)
 {
     std::vector<CodepointDraw> out {};
 
     auto font_metrics = font.GetFontMetrics();
-    glm::vec2 pen_position = {};
-
     float line_offset = (font_metrics.line_gap - font_metrics.descent + font_metrics.ascent) * font_scale;
 
-    auto words = SplitIntoWords(text);
-
-    for (size_t i = 0; i < words.size(); i++)
+    if (text.empty())
     {
-        auto& word = words[i];
+        glm::vec2 none {};
 
-        if (word.front() == unicode::LINEBREAK_CODEPOINT)
+        if (center.x)
         {
-            pen_position.y += line_offset;
-            pen_position.x = 0.0f;
-            continue;
+            none.x = area_size.x * 0.5f;
+        }
+        if (center.y)
+        {
+            none.y = area_size.y * 0.5f - line_offset * 0.5f;
         }
 
-        float word_length {};
-
-        for (size_t i = 0; i < word.length(); i++)
-        {
-            auto glyph = font.GetCodepointInfo(word[i]);
-            float kerning = CalcKerning(font, word, i);
-            word_length += (glyph.advance + kerning) * font_scale;
-        }
-
-        if (pen_position.x + word_length > area_size.x)
-        {
-            pen_position.y += line_offset;
-            pen_position.x = 0.0f;
-        }
-
-        for (size_t i = 0; i < word.length(); i++)
-        {
-            auto glyph = font.GetCodepointInfo(word[i]);
-            float kerning = CalcKerning(font, word, i);
-
-            glm::vec2 glyph_draw_offset = glm::vec2 {
-                glyph.left_bearing,
-                (glyph.offset.y + font_metrics.ascent)
-            } * font_scale;
-
-            out.emplace_back(pen_position + glyph_draw_offset, glyph.atlas_index);
-            pen_position.x += (glyph.advance + kerning) * font_scale;
-        }
+        out.emplace_back(none);
+        return out;
     }
 
-    out.emplace_back(pen_position);
+    if (text.empty() == false)
+    {
+        auto words = SplitIntoWords(text);
+
+        // First pass, organize into lines
+
+        struct Line
+        {
+            unicode::String text;
+            float length {};
+        };
+
+        std::vector<Line> lines {};
+        lines.emplace_back();
+
+        float line_size = 0.0f;
+        for (auto& word : words)
+        {
+            if (word.front() == unicode::LINEBREAK_CODEPOINT)
+            {
+                lines.emplace_back();
+                line_size = 0.0f;
+                continue;
+            }
+
+            float word_length {};
+
+            for (size_t i = 0; i < word.length(); i++)
+            {
+                auto glyph = font.GetCodepointInfo(word[i]);
+                float kerning = CalcKerning(font, word, i);
+                word_length += (glyph.advance + kerning) * font_scale;
+            }
+
+            if (line_size + word_length > area_size.x)
+            {
+                lines.emplace_back();
+                line_size = 0.0f;
+            }
+
+            line_size += word_length;
+            lines.back().text += word;
+            lines.back().length = line_size;
+        }
+
+        // Second pass, draw stuff
+
+        float vertical_center = (area_size.y - (line_offset * lines.size())) * 0.5f;
+
+        glm::vec2 pen_position = { 0.0f, -line_offset };
+
+        if (center.y)
+        {
+            pen_position.y += vertical_center;
+        }
+
+        for (auto& line : lines)
+        {
+            float horizontal_center = (area_size.x - line.length) * 0.5f;
+
+            pen_position.y += line_offset;
+            pen_position.x = 0.0f;
+
+            if (center.x)
+            {
+                pen_position.x += horizontal_center;
+            }
+
+            for (size_t i = 0; i < line.text.size(); i++)
+            {
+                auto glyph = font.GetCodepointInfo(line.text[i]);
+                float kerning = CalcKerning(font, line.text, i);
+
+                glm::vec2 glyph_draw_offset = glm::vec2 {
+                    glyph.left_bearing,
+                    (glyph.offset.y + font_metrics.ascent)
+                } * font_scale;
+
+                out.emplace_back(pen_position + glyph_draw_offset, glyph.atlas_index);
+                pen_position.x += (glyph.advance + kerning) * font_scale;
+            }
+        }
+
+        out.emplace_back(pen_position);
+    }
+
     return out;
 }
 
@@ -108,7 +165,7 @@ void TextBox::Draw(Renderer& renderer, const UIDrawInfo& draw_params, const UICu
     }
 
     auto global_offset = draw_params.rect_center - draw_params.rect_size * 0.5f;
-    cached_layout = LayoutText(*font, text, font_size, draw_params.rect_size);
+    cached_layout = LayoutText(*font, text, font_size, draw_params.rect_size, center);
 
     for (size_t i = 0; i < cached_layout.size() - 1; i++)
     {

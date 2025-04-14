@@ -54,9 +54,9 @@ Menu MakeSettingsMenu(Application& app)
 
         slider->on_value_set(*slider, 0.5f);
 
-        auto parent = canvas.elements.insert(canvas.elements.begin(), std::move(slider));
-        canvas.elements.append_child(parent, std::move(bar));
-        canvas.elements.append_child(parent, std::move(knob));
+        auto parent = canvas.AddRootNode(std::move(slider));
+        canvas.AddChildNode(parent, std::move(bar));
+        canvas.AddChildNode(parent, std::move(knob));
     }
 
     // Checkbox
@@ -115,12 +115,12 @@ Menu MakeSettingsMenu(Application& app)
 
         checkbox->on_value_set(*checkbox.get(), app.renderer.IsDebugRendering());
 
-        auto parent = canvas.elements.insert(canvas.elements.begin(), std::move(checkbox_panel));
-        canvas.elements.append_child(parent, std::move(text));
+        auto parent = canvas.AddRootNode(std::move(checkbox_panel));
+        canvas.AddChildNode(parent, std::move(text));
 
-        auto check = canvas.elements.append_child(parent, std::move(checkbox));
-        canvas.elements.append_child(check, std::move(outline));
-        canvas.elements.append_child(check, std::move(full));
+        auto check = canvas.AddChildNode(parent, std::move(checkbox));
+        canvas.AddChildNode(check, std::move(outline));
+        canvas.AddChildNode(check, std::move(full));
     }
 
     // Button Test
@@ -171,7 +171,7 @@ Menu MakeSettingsMenu(Application& app)
         region->on_click.connect([&app](Button&)
             { app.menu_stack.pop(); });
 
-        auto main_it = canvas.elements.insert(canvas.elements.begin(), std::move(region));
+        auto main_it = canvas.AddRootNode(std::move(region));
 
         auto bar = std::make_unique<UISprite>();
         bar->sprite = Texture::SharedFromImage(app.renderer.GetRenderer(), Image::FromFile("assets/images/UI/White1x1.png").value());
@@ -185,8 +185,8 @@ Menu MakeSettingsMenu(Application& app)
         text->text = unicode::FromASCII("Back to Main Menu");
         text->local_transform.colour = colour::BLACK;
 
-        canvas.elements.append_child(main_it, std::move(bar));
-        canvas.elements.append_child(main_it, std::move(text));
+        canvas.AddChildNode(main_it, std::move(bar));
+        canvas.AddChildNode(main_it, std::move(text));
     }
 
     return canvas;

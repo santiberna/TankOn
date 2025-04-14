@@ -17,6 +17,8 @@ public:
     float font_size = 1.0f;
     unicode::String text {};
 
+    glm::bvec2 center { true, true };
+
 protected:
     std::vector<CodepointDraw> cached_layout {};
 };

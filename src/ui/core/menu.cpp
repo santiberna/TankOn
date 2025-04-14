@@ -46,3 +46,13 @@ void Menu::DrawElement(Renderer& renderer, NodeIterator element, const UIDrawInf
         DrawElement(renderer, it, current_draw_info, cursor_params);
     }
 }
+
+Menu::NodeIterator Menu::AddChildNode(Menu::NodeIterator parent, std::unique_ptr<UINode>&& node)
+{
+    return elements.append_child(parent, std::move(node));
+}
+
+Menu::NodeIterator Menu::AddRootNode(std::unique_ptr<UINode>&& node)
+{
+    return elements.insert(elements.begin(), std::move(node));
+}

@@ -54,7 +54,7 @@ public:
     glm::vec2 ScreenToWorldPos(const glm::vec2& screen) const;
 
 private:
-    bool debug_enabled = false;
+    bool debug_enabled = true;
 
     uint32_t window_width {};
     uint32_t window_height {};
