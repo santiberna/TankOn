@@ -41,6 +41,8 @@ Application::Application()
     info.codepoint_ranges.emplace_back(unicode::ASCII_CODESET);
     info.codepoint_ranges.emplace_back(unicode::LATIN_SUPPLEMENT_CODESET);
 
+    info.resolutionY = 64.0f;
+
     game_font = Font::SharedFromFile(renderer.GetRenderer(), GAME_FONT, info);
 
     input = std::make_unique<InputEventSystem>(renderer.GetWindow());

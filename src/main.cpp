@@ -24,14 +24,42 @@ int main(int, char*[])
         imgui_shortcuts::InitSDL3(game.renderer.GetWindow(), game.renderer.GetRenderer());
         Log("[INFO] Initialized ImGui Successfully!");
 
-        // Music music = Music::Create("assets/music/Retro_Platforming-David_Fesliyan.mp3").value();
-        // music.Start();
+        auto music = Music::Create("assets/music/Retro_Platforming-David_Fesliyan.mp3");
+
+        PlaylistEntry entry {
+            music,
+            DeltaMS(500.0f),
+            DeltaMS(500.0f)
+        };
+
+        MusicChannel::Init();
+
+        auto skip_music = [](bool down)
+        {
+            if (down)
+                MusicChannel::NextTrack(false);
+        };
+
+        MusicChannel::PushTrack(entry);
+        MusicChannel::PushTrack(entry);
+        MusicChannel::PushTrack(entry);
+        MusicChannel::PushTrack(entry);
+
+        game.input->OnKeyPress(SDLK_1).connect(skip_music);
 
         while (!game.close_game)
         {
             imgui_shortcuts::StartFrame();
 
             game.HandleInput();
+
+            if (Mix_FadingMusic() == MIX_FADING_OUT)
+            {
+                static float timer = 0.0f;
+                timer += game.delta_timer.GetElapsed().count();
+                Log("{}", timer);
+            }
+
             game.DoFrame();
 
             imgui_shortcuts::EndFrame(game.renderer.GetRenderer());
@@ -40,6 +68,7 @@ int main(int, char*[])
         }
 
         imgui_shortcuts::ShutdownSDL3();
+        MusicChannel::Free();
     }
 
     Mix_CloseAudio();

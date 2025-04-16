@@ -32,6 +32,12 @@ using UniquePtr = std::unique_ptr<T, deleter<T, Dx>>;
         return std::nullopt; \
     }
 
+#define NullCheck(result) \
+    if (!result)          \
+    {                     \
+        return nullptr;   \
+    }
+
 inline void SDLAbortIfFailed(bool result)
 {
     if (!result)

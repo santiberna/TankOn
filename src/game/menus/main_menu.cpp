@@ -18,7 +18,7 @@ Menu MakeMainMenu(Application& app)
 
         text->text = unicode::FromASCII("TankOn!\nHello World!");
         text->font = app.game_font;
-        text->font_size = 3.0f;
+        text->font_size = 1.5f;
 
         text->local_transform.colour = colour::WHITE;
         text->local_transform.position = { 0.5f, 0.3f };
