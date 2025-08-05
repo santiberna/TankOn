@@ -1,6 +1,8 @@
 #include <SDL3/SDL_main.h>
 #include <utility/imgui_common.hpp>
-#include <engine/audio.hpp>
+
+// #include <engine/audio.hpp>
+
 #include <game/application.hpp>
 
 #include <game/data/lobby_discovery.hpp>
@@ -12,8 +14,9 @@ int main(int, char*[])
     SDLAbortIfFailed(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
     Log("[INFO] Initialized SDL Successfully!");
 
-    SDLAbortIfFailed(Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG));
-    SDLAbortIfFailed(Mix_OpenAudio(0, nullptr));
+    // SDLAbortIfFailed(Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG));
+    // SDLAbortIfFailed(Mix_OpenAudio(0, nullptr));
+
     Log("[INFO] Initialized SDL_Mixer Successfully!");
 
     {
@@ -40,8 +43,9 @@ int main(int, char*[])
         imgui_shortcuts::ShutdownSDL3();
     }
 
-    Mix_CloseAudio();
-    Mix_Quit();
+    // Mix_CloseAudio();
+    // Mix_Quit();
+
     SDL_Quit();
 
     return 0;

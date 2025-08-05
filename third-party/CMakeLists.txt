@@ -5,23 +5,24 @@ add_library(ThirdParty INTERFACE)
 FetchContent_Declare(
     SDL_lib
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-    GIT_TAG preview-3.1.3
+    GIT_TAG release-3.2.20
     GIT_SHALLOW TRUE
     GIT_PROGRESS TRUE
 )
 
 FetchContent_MakeAvailable(SDL_lib)
+
 # SDL_Mixer
 
-FetchContent_Declare(
-    SDL_mixer_lib
-    GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer.git
-    GIT_TAG main 
-    GIT_SHALLOW TRUE
-    GIT_PROGRESS TRUE
-)
+# FetchContent_Declare(
+#     SDL_mixer_lib
+#     GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer.git
+#     GIT_TAG main 
+#     GIT_SHALLOW TRUE
+#     GIT_PROGRESS TRUE
+# )
 
-FetchContent_MakeAvailable(SDL_mixer_lib)
+# FetchContent_MakeAvailable(SDL_mixer_lib)
 
 # GLM
 
@@ -135,7 +136,7 @@ target_link_directories(ThirdParty
 
 target_link_libraries(ThirdParty 
     INTERFACE SDL3-static
-    INTERFACE SDL3_mixer-static 
+    # INTERFACE SDL3_mixer-static 
     INTERFACE glm::glm
     INTERFACE cereal::cereal
     INTERFACE ImGui
